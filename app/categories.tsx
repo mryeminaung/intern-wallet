@@ -51,7 +51,7 @@ export default function CategoriesScreen(): React.JSX.Element {
     ]);
   };
 
-  return <Screen><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+  return <Screen><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
     <View style={styles.header}><Pressable accessibilityLabel="Go back" onPress={() => router.back()} style={styles.back}><ArrowLeft color={colors.text} size={22} /></Pressable><Text style={styles.title}>Categories</Text></View>
     <Text style={styles.subtitle}>Create your own income and expense categories. Built-in categories stay available.</Text>
     <View style={styles.tabs}>{(['expense', 'income'] as const).map((value) => <Pressable key={value} onPress={() => { setType(value); resetForm(); }} style={[styles.tab, type === value && styles.selected]}><Text style={[styles.tabText, type === value && styles.selectedText]}>{value === 'expense' ? 'Expenses' : 'Income'}</Text></Pressable>)}</View>

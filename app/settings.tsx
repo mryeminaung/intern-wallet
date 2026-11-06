@@ -1,9 +1,10 @@
 import Constants from 'expo-constants';
 import { ArrowDownLeft, ArrowLeft, ChevronRight, CloudOff, Database, Info, Palette, ShieldCheck, Tags, WalletCards, type LucideIcon } from 'lucide-react-native';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Screen } from '../src/components/shared/Screen';
-import { APP_NAME } from '../src/lib/constants';
+import { ProfileAvatar } from '../src/features/profile/components/profile-avatar';
+import { useProfile } from '../src/features/profile/hooks/use-profile';
 import { colors } from '../src/theme/colors';
 import { fontFamily } from '../src/theme/typography';
 import { radii, shadows, spacing } from '../src/theme/spacing';
@@ -15,10 +16,12 @@ export default function SettingsScreen(): React.JSX.Element {
   const router = useRouter();
   const setTransactionType = useTransactionFilterStore((state) => state.setType);
   const setTransactionCategory = useTransactionFilterStore((state) => state.setCategoryId);
-  return <Screen><ScrollView contentContainerStyle={styles.content}>
+  const { profile } = useProfile();
+  const profileDetail = [profile.role, profile.organization].filter(Boolean).join(' · ');
+  return <Screen><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
     <View style={styles.header}><Pressable accessibilityLabel="Go back" accessibilityRole="button" onPress={() => router.back()} style={styles.back}><ArrowLeft color={colors.text} size={22} /></Pressable><View><Text style={styles.eyebrow}>YOUR WALLET</Text><Text style={styles.title}>Settings</Text></View></View>
 
-    <View style={styles.identityCard}><Image accessibilityIgnoresInvertColors source={require('../assets/icon.png')} style={styles.identityLogo} /><View style={styles.identityCopy}><Text style={styles.identityTitle}>{APP_NAME}</Text><Text style={styles.identityText}>Private, offline-first money tracking.</Text></View></View>
+    <Pressable accessibilityLabel="Edit profile" accessibilityRole="button" onPress={() => router.push('/profile')} style={({ pressed }) => [styles.identityCard, pressed && styles.pressed]}><ProfileAvatar avatarUri={profile.avatarUri} displayName={profile.displayName} size={58} /><View style={styles.identityCopy}><Text style={styles.identityTitle}>{profile.displayName || 'Set up your profile'}</Text><Text numberOfLines={2} style={styles.identityText}>{profileDetail || 'Add your name, photo, and internship details'}</Text></View><ChevronRight color={colors.forest} size={19} /></Pressable>
 
     <SettingsSection title="Manage your money">
       <SettingsLink icon={ArrowDownLeft} label="Income history" value="View transactions filtered to income" onPress={() => { setTransactionType('income'); setTransactionCategory(null); router.push('/transactions'); }} />
@@ -64,7 +67,6 @@ const styles = StyleSheet.create({
   eyebrow: { color: colors.income, fontFamily: fontFamily.semiBold, fontSize: 10, letterSpacing: 1.2 },
   title: { color: colors.text, fontFamily: fontFamily.bold, fontSize: 28, marginTop: 2 },
   identityCard: { alignItems: 'center', backgroundColor: colors.forestSoft, borderRadius: radii.lg, flexDirection: 'row', marginTop: spacing.xl, padding: spacing.md },
-  identityLogo: { borderRadius: radii.md, height: 52, width: 52 },
   identityCopy: { flex: 1, marginLeft: spacing.md },
   identityTitle: { color: colors.forest, fontFamily: fontFamily.bold, fontSize: 17 },
   identityText: { color: colors.forestDark, fontFamily: fontFamily.regular, fontSize: 12, lineHeight: 18, marginTop: spacing.xs },

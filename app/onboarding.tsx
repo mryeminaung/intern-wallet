@@ -88,7 +88,7 @@ export default function OnboardingScreen(): React.JSX.Element {
     finally { setBusy(false); }
   };
 
-  return <Screen><KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+  return <Screen><KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
     <View style={styles.topBar}>{step > 0 ? <Pressable accessibilityLabel="Previous step" accessibilityRole="button" disabled={busy} onPress={() => { setStep((current) => Math.max(0, current - 1)); setError(null); }} style={styles.back}><ChevronLeft color={colors.text} size={22} /></Pressable> : <View style={styles.back} />}<View style={styles.progress}><View style={[styles.progressFill, { width: `${(step + 1) * 25}%` }]} /></View><Pressable accessibilityRole="button" disabled={busy} onPress={() => { void skip(); }}><Text style={styles.skip}>Skip</Text></Pressable></View>
 
     {step === 0 ? <WelcomeStep /> : null}

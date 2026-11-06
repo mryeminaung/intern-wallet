@@ -56,7 +56,7 @@ export default function ReportsScreen(): React.JSX.Element {
     setPeriodOffset((current) => Math.min(0, current + offset));
   };
 
-  return <Screen><ScrollView contentContainerStyle={styles.content}>
+  return <Screen><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
     <Text style={styles.eyebrow}>MONEY STORIES</Text>
     <Text style={styles.title}>Insights</Text>
     <Text style={styles.subtitle}>Understand what changed and what to do next.</Text>

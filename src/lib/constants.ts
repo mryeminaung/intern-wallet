@@ -11,4 +11,8 @@ export const settingKeys = {
   dateFormat: 'date_format',
   currencyDisplay: 'currency_display',
   onboardingCompleted: 'onboarding_completed',
+  profileName: 'profile_name',
+  profileRole: 'profile_role',
+  profileOrganization: 'profile_organization',
+  profileAvatarUri: 'profile_avatar_uri',
 } as const;

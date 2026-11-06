@@ -83,7 +83,7 @@ export default function TransactionsScreen(): React.JSX.Element {
   };
 
   return <Screen>
-    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
       <View style={styles.headerRow}>
         <View style={styles.headerCopy}><Text style={styles.eyebrow}>MONEY LOG</Text><Text style={styles.title}>Activity</Text><Text style={styles.subtitle}>Every income and expense, in one place.</Text></View>
         <Pressable accessibilityLabel="Add transaction" accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}><Plus color={colors.white} size={22} /></Pressable>
@@ -111,7 +111,7 @@ export default function TransactionsScreen(): React.JSX.Element {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalOverlay}>
         <View style={styles.sheet}>
           <View style={styles.sheetHeader}><View><Text style={styles.sheetTitle}>More filters</Text><Text style={styles.sheetSubtitle}>Narrow down this month’s activity.</Text></View><Pressable accessibilityLabel="Close filters" onPress={() => setAdvancedOpen(false)} style={styles.closeButton}><X color={colors.textMuted} size={20} /></Pressable></View>
-          <ScrollView contentContainerStyle={styles.sheetContent} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={styles.sheetContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Text style={styles.fieldLabel}>Category</Text>
             <ScrollView contentContainerStyle={styles.chipRow} horizontal showsHorizontalScrollIndicator={false}><Pressable onPress={() => setCategoryId(null)} style={[styles.sheetChip, !categoryId && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, !categoryId && styles.sheetChipTextSelected]}>All categories</Text></Pressable>{categories.map((category) => <Pressable key={category.id} onPress={() => setCategoryId(category.id)} style={[styles.sheetChip, categoryId === category.id && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, categoryId === category.id && styles.sheetChipTextSelected]}>{category.icon} {category.name}</Text></Pressable>)}</ScrollView>
 

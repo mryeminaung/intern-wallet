@@ -20,7 +20,15 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Intern Wallet to choose a profile photo.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
     ],
     "ios": {
       "supportsTablet": true

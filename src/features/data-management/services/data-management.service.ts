@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { WalletData } from '../../../types/common';
 import { DataManagementRepository } from '../../../database/repositories/data-management.repository';
+import { settingKeys } from '../../../lib/constants';
 
 const isoDate = z.string().refine((value) => Number.isFinite(Date.parse(value)), 'Invalid date');
 const amount = z.number().int().positive().safe();
@@ -41,7 +42,8 @@ export class DataManagementService {
 
   public async createBackup(): Promise<string> {
     const data = await this.repository.readAll();
-    return JSON.stringify({ format: 'intern-wallet-backup', version: 1, createdAt: new Date().toISOString(), data });
+    const portableData = { ...data, settings: data.settings.filter((item) => item.key !== settingKeys.profileAvatarUri) };
+    return JSON.stringify({ format: 'intern-wallet-backup', version: 1, createdAt: new Date().toISOString(), data: portableData });
   }
 
   public previewBackup(json: string): BackupPreview {

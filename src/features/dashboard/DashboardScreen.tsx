@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { AppState, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Settings } from 'lucide-react-native';
 import { Screen } from '../../components/shared/Screen';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
@@ -14,11 +13,14 @@ import { DailyBudgetCard } from './components/daily-budget-card';
 import { FinancialSummary } from './components/financial-summary';
 import { QuickActions } from './components/quick-actions';
 import { RecentTransactions } from './components/recent-transactions';
+import { ProfileAvatar } from '../profile/components/profile-avatar';
+import { useProfile } from '../profile/hooks/use-profile';
 
 export function DashboardScreen(): React.JSX.Element {
   const router = useRouter();
   const { data, loading, error, refresh } = useDashboard();
   const { data: dailyBudget, loading: dailyBudgetLoading, error: dailyBudgetError, refresh: refreshDailyBudget } = useDailyBudget();
+  const { profile } = useProfile();
   useFocusEffect(useCallback(() => {
     const refreshAll = (): void => { void Promise.all([refresh(), refreshDailyBudget()]); };
     let dayTimer: ReturnType<typeof setTimeout>;
@@ -43,9 +45,10 @@ export function DashboardScreen(): React.JSX.Element {
     };
   }, [refresh, refreshDailyBudget]));
   const greeting = getGreeting();
+  const personalizedGreeting = profile.displayName ? `${greeting}, ${profile.displayName}` : greeting;
 
-  return <Screen><ScrollView contentContainerStyle={styles.content}>
-    <View style={styles.header}><View style={styles.headerCopy}><View style={styles.brandRow}><Image accessibilityIgnoresInvertColors source={require('../../../assets/icon.png')} style={styles.logo} /><Text style={styles.eyebrow}>TODAY</Text></View><Text style={styles.title}>{greeting}</Text><Text style={styles.subtitle}>Know what is safe to spend before you spend it.</Text></View><Pressable accessibilityLabel="Open settings" accessibilityRole="button" onPress={() => router.push('/settings')} style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}><Settings color={colors.forest} size={21} /></Pressable></View>
+  return <Screen><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <View style={styles.header}><View style={styles.headerCopy}><View style={styles.brandRow}><Image accessibilityIgnoresInvertColors source={require('../../../assets/icon.png')} style={styles.logo} /><Text style={styles.eyebrow}>TODAY</Text></View><Text numberOfLines={2} style={styles.title}>{personalizedGreeting}</Text><Text style={styles.subtitle}>Know what is safe to spend before you spend it.</Text></View><Pressable accessibilityLabel="Open settings" accessibilityRole="button" onPress={() => router.push('/settings')} style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}><ProfileAvatar avatarUri={profile.avatarUri} displayName={profile.displayName} size={44} /></Pressable></View>
     {loading ? <Text style={styles.status}>Loading your dashboard…</Text> : null}
     {error ? <Text style={styles.error}>{error}</Text> : null}
     {data ? <>

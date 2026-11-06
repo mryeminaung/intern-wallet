@@ -15,7 +15,7 @@ export default function PlanScreen(): React.JSX.Element {
   useFocusEffect(useCallback(() => { void refresh(); }, [refresh]));
   const suggested = data ? getDailyOutlook(data.remainingToday, data.suggestedSafeDailySpending) : null;
 
-  return <Screen><ScrollView contentContainerStyle={styles.content}>
+  return <Screen><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
     <View style={styles.header}><View><Text style={styles.eyebrow}>YOUR MONEY PLAN</Text><Text style={styles.title}>Plan</Text></View><Pressable accessibilityLabel="Open settings" accessibilityRole="button" onPress={() => router.push('/settings')} style={({ pressed }) => [styles.settings, pressed && styles.pressed]}><Settings color={colors.forest} size={21} /></Pressable></View>
     <Text style={styles.subtitle}>Set limits now so everyday spending stays predictable.</Text>
 

@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ArrowLeft } from 'lucide-react-native';
 import { Screen } from '../src/components/shared/Screen';
 import { DataManagementRepository } from '../src/database/repositories/data-management.repository';
+import { pickBackupFile, shareDataFile } from '../src/features/data-management/services/data-file.service';
+import type { BackupPreview } from '../src/features/data-management/services/data-management.service';
 import { DataManagementService } from '../src/features/data-management/services/data-management.service';
 import { colors } from '../src/theme/colors';
 import { fontFamily } from '../src/theme/typography';
@@ -14,48 +16,74 @@ export default function DataManagementScreen(): React.JSX.Element {
   const router = useRouter();
   const database = useSQLiteContext();
   const service = useMemo(() => new DataManagementService(new DataManagementRepository(database)), [database]);
-  const [backupText, setBackupText] = useState('');
+  const [selectedBackup, setSelectedBackup] = useState<{ name: string; content: string; preview: BackupPreview } | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const share = async (kind: 'csv' | 'backup'): Promise<void> => {
+
+  const exportFile = async (kind: 'csv' | 'backup'): Promise<void> => {
     if (busy) return;
     setBusy(true); setError(null); setMessage(null);
     try {
       const content = kind === 'csv' ? await service.exportCsv() : await service.createBackup();
-      await Share.share({ message: content, title: kind === 'csv' ? 'Intern Wallet CSV' : 'Intern Wallet JSON backup' });
-      setMessage(kind === 'csv' ? 'CSV text is ready to save from the share sheet.' : 'Keep your JSON backup in a safe place.');
-    } catch { setError('The data could not be shared. Please try again.'); }
+      const fileName = await shareDataFile(content, kind);
+      setMessage(`${fileName} is ready in the share sheet.`);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'The file could not be exported. Please try again.'); }
     finally { setBusy(false); }
   };
-  const previewRestore = (): void => {
-    setError(null); setMessage(null);
+
+  const chooseBackup = async (): Promise<void> => {
+    if (busy) return;
+    setBusy(true); setError(null); setMessage(null);
     try {
-      const preview = service.previewBackup(backupText);
-      Alert.alert('Replace all wallet data?', `Backup from ${new Date(preview.createdAt).toLocaleString()} contains ${preview.transactions} transactions, ${preview.categories} categories, ${preview.budgets} budgets, and ${preview.settings} settings. Existing wallet data will be replaced.`, [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Replace data', style: 'destructive', onPress: () => { void restore(backupText); } },
-      ]);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Backup could not be read.'); }
+      const picked = await pickBackupFile();
+      if (!picked) return;
+      const preview = service.previewBackup(picked.content);
+      setSelectedBackup({ ...picked, preview });
+    } catch (cause) {
+      setSelectedBackup(null);
+      setError(cause instanceof Error ? cause.message : 'The backup file could not be read.');
+    } finally { setBusy(false); }
   };
+
+  const confirmRestore = (): void => {
+    if (!selectedBackup) return;
+    setError(null); setMessage(null);
+    const { content, preview } = selectedBackup;
+    Alert.alert('Replace all wallet data?', `Backup from ${new Date(preview.createdAt).toLocaleString()} contains ${preview.transactions} transactions, ${preview.categories} categories, ${preview.budgets} budgets, and ${preview.settings} settings. Existing wallet data will be replaced.`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Replace data', style: 'destructive', onPress: () => { void restore(content); } },
+    ]);
+  };
+
   const restore = async (json: string): Promise<void> => {
     if (busy) return;
     setBusy(true); setError(null); setMessage(null);
-    try { await service.restoreBackup(json); setBackupText(''); setMessage('Backup restored. Reopen Home to see the restored figures.'); }
+    try { await service.restoreBackup(json); setSelectedBackup(null); setMessage('Backup restored. Reopen Home to see the restored figures.'); }
     catch (cause) { setError(cause instanceof Error ? cause.message : 'Restore failed. Your current data was not changed.'); }
     finally { setBusy(false); }
   };
 
-  return <Screen><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+  return <Screen><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
     <View style={styles.header}><Pressable accessibilityLabel="Go back" onPress={() => router.back()} style={styles.back}><ArrowLeft color={colors.text} size={22} /></Pressable><Text style={styles.title}>Data management</Text></View>
     <Text style={styles.subtitle}>Your data stays on this device unless you choose to share it.</Text>
-    <View style={styles.card}><Text style={styles.heading}>CSV transactions</Text><Text style={styles.help}>Share income and expense rows with date, type, category, amount in MMK, and note.</Text><Action label="Share CSV text" disabled={busy} onPress={() => { void share('csv'); }} /></View>
-    <View style={styles.card}><Text style={styles.heading}>JSON backup</Text><Text style={styles.help}>Includes transactions, categories, monthly budgets, daily limit, internship dates, and app settings.</Text><Action label="Share JSON backup text" disabled={busy} onPress={() => { void share('backup'); }} /></View>
-    <View style={styles.card}><Text style={styles.heading}>Restore backup</Text><Text style={styles.help}>Paste a previously shared Intern Wallet JSON backup. You can inspect its counts before confirming replacement.</Text><TextInput accessibilityLabel="Paste JSON backup" multiline onChangeText={setBackupText} placeholder="Paste backup JSON here" placeholderTextColor={colors.textMuted} style={styles.input} textAlignVertical="top" value={backupText} /><Action label="Review and restore" disabled={busy || !backupText.trim()} onPress={previewRestore} /></View>
+    <View style={styles.card}><Text style={styles.heading}>CSV transactions</Text><Text style={styles.help}>Export income and expense rows with date, type, category, amount in MMK, and note.</Text><Action label="Export CSV file" disabled={busy} onPress={() => { void exportFile('csv'); }} /></View>
+    <View style={styles.card}><Text style={styles.heading}>JSON backup</Text><Text style={styles.help}>Export transactions, categories, monthly budgets, daily limit, internship dates, and app settings.</Text><Action label="Export JSON backup" disabled={busy} onPress={() => { void exportFile('backup'); }} /></View>
+    <View style={styles.card}>
+      <Text style={styles.heading}>Restore backup</Text>
+      <Text style={styles.help}>Choose an Intern Wallet JSON backup. Its contents are validated before you can replace your current data.</Text>
+      <Action label="Choose JSON backup file" disabled={busy} onPress={() => { void chooseBackup(); }} />
+      {selectedBackup ? <View style={styles.filePreview}>
+        <Text numberOfLines={1} style={styles.fileName}>{selectedBackup.name}</Text>
+        <Text style={styles.fileDetails}>Created {new Date(selectedBackup.preview.createdAt).toLocaleString()}</Text>
+        <Text style={styles.fileDetails}>{selectedBackup.preview.transactions} transactions · {selectedBackup.preview.categories} categories · {selectedBackup.preview.budgets} budgets</Text>
+        <Action label="Restore selected backup" disabled={busy} onPress={confirmRestore} />
+      </View> : null}
+    </View>
     {busy ? <ActivityIndicator color={colors.forest} style={styles.status} /> : null}
     {message ? <Text style={styles.success}>{message}</Text> : null}
     {error ? <Text style={styles.error}>{error}</Text> : null}
-    <Text style={styles.footnote}>Sharing uses Android’s text share sheet. This version cannot create or open standalone files yet.</Text>
+    <Text style={styles.footnote}>Exports are real files opened in your system share/save sheet. Keep JSON backups in a safe place.</Text>
   </ScrollView></Screen>;
 }
 
@@ -75,7 +103,9 @@ const styles = StyleSheet.create({
   action: { alignItems: 'center', backgroundColor: colors.forest, borderRadius: radii.sm, marginTop: spacing.md, minHeight: 48, justifyContent: 'center' },
   disabled: { opacity: 0.5 },
   actionText: { color: colors.white, fontFamily: fontFamily.semiBold, fontSize: 13 },
-  input: { borderColor: colors.border, borderRadius: radii.sm, borderWidth: 1, color: colors.text, fontFamily: fontFamily.regular, marginTop: spacing.md, minHeight: 110, padding: spacing.sm },
+  filePreview: { borderColor: colors.border, borderRadius: radii.sm, borderWidth: 1, marginTop: spacing.md, padding: spacing.md },
+  fileName: { color: colors.text, fontFamily: fontFamily.semiBold, fontSize: 13 },
+  fileDetails: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 12, lineHeight: 18, marginTop: spacing.xs },
   status: { marginTop: spacing.md },
   success: { color: colors.income, fontFamily: fontFamily.medium, marginTop: spacing.md },
   error: { color: colors.expense, fontFamily: fontFamily.medium, marginTop: spacing.md },

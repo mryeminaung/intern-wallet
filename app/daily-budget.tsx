@@ -92,7 +92,7 @@ export default function DailyBudgetScreen(): React.JSX.Element {
     }
   };
 
-  return <Screen><KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+  return <Screen><KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
     <View style={styles.header}><Pressable accessibilityLabel="Go back" onPress={() => router.back()} style={styles.back}><ArrowLeft color={colors.text} size={22} /></Pressable><Text style={styles.title}>Daily budget</Text><View style={styles.headerSpacer} /></View>
     <Text style={styles.subtitle}>Set a simple daily limit and track your four-month internship safely.</Text>
     {loading ? <ActivityIndicator color={colors.forest} style={styles.loading} /> : <View style={styles.form}>

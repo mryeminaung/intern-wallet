@@ -18,7 +18,7 @@ export default function DailyHistoryScreen(): React.JSX.Element {
   const { data, loading, error, refresh } = useDailyHistory(monthDate);
   useFocusEffect(useCallback(() => { void refresh(); }, [refresh]));
 
-  return <Screen><ScrollView contentContainerStyle={styles.content}>
+  return <Screen><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
     <View style={styles.header}><Pressable accessibilityLabel="Go back" accessibilityRole="button" onPress={() => router.back()} style={styles.nav}><ArrowLeft color={colors.text} size={22} /></Pressable><Text style={styles.title}>Daily history</Text></View>
     <Text style={styles.subtitle}>Each day has its own limit. Unused amounts do not roll over.</Text>
     <View style={styles.monthRow}><Pressable accessibilityLabel="Previous month" onPress={() => setOffset((value) => value - 1)} style={styles.nav}><ChevronLeft color={colors.forest} size={20} /></Pressable><Text style={styles.month}>{data?.periodLabel ?? formatMonth(monthDate)}</Text><Pressable accessibilityLabel="Next month" disabled={offset >= 0} onPress={() => setOffset((value) => Math.min(0, value + 1))} style={styles.nav}><ChevronRight color={offset >= 0 ? colors.border : colors.forest} size={20} /></Pressable></View>

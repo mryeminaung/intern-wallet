@@ -104,7 +104,7 @@ export default function BudgetScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Pressable accessibilityLabel="Go back" onPress={() => router.back()} style={styles.iconButton}><ArrowLeft color={colors.text} size={22} /></Pressable>
           <Text style={styles.title}>Budgets</Text>
