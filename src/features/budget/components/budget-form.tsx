@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { CalendarDays } from 'lucide-react-native';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { formatMonth } from '../../../lib/date';
@@ -30,11 +30,9 @@ export function BudgetForm({ categories, isEditing, initialValues, submitting, e
   const selectedCategory = watch('categoryId');
   const month = watch('month');
 
-  const handleDateChange = (event: DateTimePickerEvent, date?: Date): void => {
+  const handleDateChange = (date: Date): void => {
     setShowMonthPicker(false);
-    if (event.type !== 'dismissed' && date) {
-      setValue('month', formatMonth(date), { shouldValidate: true });
-    }
+    setValue('month', formatMonth(date), { shouldValidate: true });
   };
 
   return (
@@ -42,7 +40,7 @@ export function BudgetForm({ categories, isEditing, initialValues, submitting, e
       <Text style={styles.formTitle}>{isEditing ? 'Edit budget' : 'New budget'}</Text>
       <Text style={styles.label}>Month</Text>
       <Pressable onPress={() => setShowMonthPicker(true)} style={styles.field}><CalendarDays color={colors.forest} size={19} /><Text style={styles.fieldText}>{month}</Text></Pressable>
-      {showMonthPicker ? <DateTimePicker mode="date" onChange={handleDateChange} value={new Date(`${month}-01T12:00:00`)} /> : null}
+      {showMonthPicker ? <DateTimePicker mode="date" onDismiss={() => setShowMonthPicker(false)} onValueChange={(_event, date) => handleDateChange(date)} value={new Date(`${month}-01T12:00:00`)} /> : null}
 
       <Text style={styles.label}>Budget scope</Text>
       <ScrollView contentContainerStyle={styles.scopeRow} horizontal showsHorizontalScrollIndicator={false}>

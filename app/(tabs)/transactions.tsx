@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react-native';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -65,10 +65,10 @@ export default function TransactionsScreen(): React.JSX.Element {
     setToDate(null);
   };
 
-  const handleFilterDateChange = (event: DateTimePickerEvent, date?: Date): void => {
+  const handleFilterDateChange = (date: Date): void => {
     const activeFilter = filterDate;
     setFilterDate(null);
-    if (event.type === 'dismissed' || !date || !activeFilter) return;
+    if (!activeFilter) return;
     if (activeFilter === 'from') setFromDate(date); else setToDate(date);
   };
 
@@ -128,7 +128,7 @@ export default function TransactionsScreen(): React.JSX.Element {
         </View>
       </KeyboardAvoidingView>
     </Modal>
-    {filterDate ? <DateTimePicker mode="date" onChange={handleFilterDateChange} value={(filterDate === 'from' ? fromDate : toDate) ?? new Date()} /> : null}
+    {filterDate ? <DateTimePicker mode="date" onDismiss={() => setFilterDate(null)} onValueChange={(_event, date) => handleFilterDateChange(date)} value={(filterDate === 'from' ? fromDate : toDate) ?? new Date()} /> : null}
   </Screen>;
 }
 

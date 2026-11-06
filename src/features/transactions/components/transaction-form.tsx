@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { CalendarDays, ChevronDown } from 'lucide-react-native';
 import {
   ActivityIndicator,
@@ -76,11 +76,8 @@ export function TransactionForm({
     }
   }, [selectedCategory, selectedType, setValue]);
 
-  const handleDateChange = (event: DateTimePickerEvent, date?: Date): void => {
+  const handleDateChange = (date: Date): void => {
     setDatePicker(false);
-    if (event.type === 'dismissed' || !date) {
-      return;
-    }
     setValue('date', date.toISOString(), { shouldValidate: true });
   };
 
@@ -165,7 +162,8 @@ export function TransactionForm({
               {datePicker ? (
                 <DateTimePicker
                   mode="date"
-                  onChange={handleDateChange}
+                  onDismiss={() => setDatePicker(false)}
+                  onValueChange={(_event, date) => handleDateChange(date)}
                   value={new Date(selectedDate)}
                 />
               ) : null}

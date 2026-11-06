@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { Screen } from '../../src/components/shared/Screen';
 import { useReports } from '../../src/features/reports/hooks/use-reports';
@@ -39,10 +39,10 @@ export default function ReportsScreen(): React.JSX.Element {
   const { data, loading, error, refresh } = useReports(period);
   useFocusEffect(useCallback(() => { void refresh(); }, [refresh]));
 
-  const handleDateChange = (event: DateTimePickerEvent, date?: Date): void => {
+  const handleDateChange = (date: Date): void => {
     const active = picker;
     setPicker(null);
-    if (event.type === 'dismissed' || !date || !active) return;
+    if (!active) return;
     if (active === 'from') setCustomFrom(date); else setCustomTo(date);
   };
 
@@ -63,7 +63,7 @@ export default function ReportsScreen(): React.JSX.Element {
 
     <View style={styles.modeRow}>{([['month', 'Month'], ['week', 'Week'], ['year', 'Year'], ['custom', 'Custom']] as const).map(([value, label]) => <Pressable accessibilityRole="button" key={value} onPress={() => changeMode(value)} style={[styles.modeChip, mode === value && styles.modeSelected]}><Text style={[styles.modeText, mode === value && styles.modeTextSelected]}>{label}</Text></Pressable>)}</View>
     {mode === 'custom' ? <View style={styles.customDateRow}><DateButton label={formatDisplayDate(customFrom.toISOString())} onPress={() => setPicker('from')} /><DateButton label={formatDisplayDate(customTo.toISOString())} onPress={() => setPicker('to')} /></View> : null}
-    {picker ? <DateTimePicker mode="date" onChange={handleDateChange} value={picker === 'from' ? customFrom : customTo} /> : null}
+    {picker ? <DateTimePicker mode="date" onDismiss={() => setPicker(null)} onValueChange={(_event, date) => handleDateChange(date)} value={picker === 'from' ? customFrom : customTo} /> : null}
     <View style={styles.periodNavigator}><Pressable accessibilityLabel="Previous reporting period" disabled={mode === 'custom'} onPress={() => changePeriod(-1)} style={styles.periodButton}><ChevronLeft color={mode === 'custom' ? colors.border : colors.forest} size={20} /></Pressable><Text style={styles.periodLabel}>{period.label}</Text><Pressable accessibilityLabel="Next reporting period" disabled={mode === 'custom' || periodOffset >= 0} onPress={() => changePeriod(1)} style={styles.periodButton}><ChevronRight color={mode === 'custom' || periodOffset >= 0 ? colors.border : colors.forest} size={20} /></Pressable></View>
 
     {loading ? <Text style={styles.status}>Preparing your report…</Text> : null}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { ArrowLeft, CalendarDays } from 'lucide-react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useRouter } from 'expo-router';
@@ -50,10 +50,10 @@ export default function DailyBudgetScreen(): React.JSX.Element {
 
   useEffect(() => { void load(); }, [load]);
 
-  const handleDateChange = (event: DateTimePickerEvent, date?: Date): void => {
+  const handleDateChange = (date: Date): void => {
     const active = picker;
     setPicker(null);
-    if (event.type === 'dismissed' || !date || !active) return;
+    if (!active) return;
     if (active === 'start') setStartDate(date); else setEndDate(date);
   };
 
@@ -106,7 +106,7 @@ export default function DailyBudgetScreen(): React.JSX.Element {
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Pressable accessibilityRole="button" disabled={saving} onPress={() => { void save(); }} style={[styles.save, saving && styles.disabled]}>{saving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveText}>Save settings</Text>}</Pressable>
     </View>}
-  </ScrollView></KeyboardAvoidingView>{picker ? <DateTimePicker mode="date" onChange={handleDateChange} value={(picker === 'start' ? startDate : endDate) ?? new Date()} /> : null}</Screen>;
+  </ScrollView></KeyboardAvoidingView>{picker ? <DateTimePicker mode="date" onDismiss={() => setPicker(null)} onValueChange={(_event, date) => handleDateChange(date)} value={(picker === 'start' ? startDate : endDate) ?? new Date()} /> : null}</Screen>;
 }
 
 const styles = StyleSheet.create({

@@ -107,13 +107,15 @@ const styles = StyleSheet.create({
   },
   iconWrap: {
     alignItems: 'center',
-    borderRadius: 13,
+    borderRadius: 19,
     height: 38,
     justifyContent: 'center',
+    overflow: 'hidden',
     width: 38,
   },
   iconWrapActive: {
     backgroundColor: colors.forest,
+    borderRadius: 19,
   },
   itemPressed: {
     opacity: 0.78,
