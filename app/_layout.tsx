@@ -15,6 +15,7 @@ import { initializeDatabase } from '../src/database/client';
 import { SqliteSettingsRepository } from '../src/database/repositories/settings.repository';
 import { SqliteTransactionRepository } from '../src/database/repositories/transaction.repository';
 import { DATABASE_NAME, settingKeys } from '../src/lib/constants';
+import { ToastBanner } from '../src/components/shared/ToastBanner';
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -82,5 +83,5 @@ function AppNavigator(): React.JSX.Element {
     return () => { active = false; };
   }, [database, pathname, router]);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return <><Stack screenOptions={{ headerShown: false }} /><ToastBanner /></>;
 }

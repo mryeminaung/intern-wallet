@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { isValidDateString } from '../../../lib/date';
-import type { CreateTransactionInput, TransactionType } from '../../../types/common';
+import type { CreateTransactionInput, Transaction, TransactionType } from '../../../types/common';
 import { transactionTypes } from '../../../types/common';
 
 export const transactionFormSchema = z.object({
@@ -25,5 +25,15 @@ export function formValuesToTransactionInput(values: TransactionFormValues): Cre
     categoryId: values.categoryId,
     date: values.date,
     note: values.note?.trim() || null,
+  };
+}
+
+export function transactionToRepeatFormValues(transaction: Transaction, referenceDate: Date = new Date()): TransactionFormValues {
+  return {
+    type: transaction.type,
+    amount: String(transaction.amount),
+    categoryId: transaction.categoryId,
+    date: referenceDate.toISOString(),
+    note: transaction.note ?? '',
   };
 }

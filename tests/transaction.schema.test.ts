@@ -1,4 +1,4 @@
-import { formValuesToTransactionInput, transactionFormSchema } from '../src/features/transactions/schemas/transaction.schema';
+import { formValuesToTransactionInput, transactionFormSchema, transactionToRepeatFormValues } from '../src/features/transactions/schemas/transaction.schema';
 
 describe('transaction form validation', () => {
   it('accepts a positive whole MMK amount and normalizes the note', () => {
@@ -32,5 +32,19 @@ describe('transaction form validation', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it('prefills repeated transactions with today while preserving editable details', () => {
+    const today = new Date(2026, 10, 6, 9, 30);
+    expect(transactionToRepeatFormValues({
+      id: 'transaction-1',
+      type: 'expense',
+      amount: 4500,
+      categoryId: 'food',
+      note: 'Lunch',
+      date: '2026-11-01T03:00:00.000Z',
+      createdAt: '2026-11-01T03:00:00.000Z',
+      updatedAt: '2026-11-01T03:00:00.000Z',
+    }, today)).toEqual({ type: 'expense', amount: '4500', categoryId: 'food', note: 'Lunch', date: today.toISOString() });
   });
 });

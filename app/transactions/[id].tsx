@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, CalendarDays, Pencil, Tag, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, CalendarDays, CopyPlus, Pencil, Tag, Trash2 } from 'lucide-react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Screen } from '../../src/components/shared/Screen';
 import { Surface } from '../../src/components/ui/Surface';
@@ -116,6 +116,7 @@ export default function TransactionDetailsScreen(): React.JSX.Element {
             <View style={styles.detailRow}><CalendarDays color={colors.forest} size={19} /><Text style={styles.detailLabel}>Date</Text><Text style={styles.detailValue}>{formatDisplayDate(transaction.date)}</Text></View>
             <View style={styles.noteBox}><Text style={styles.noteLabel}>Note</Text><Text style={styles.note}>{transaction.note || 'No note added.'}</Text></View>
           </Surface>
+          <Pressable accessibilityRole="button" onPress={() => router.push(`/transactions/new?repeatId=${transaction.id}`)} style={({ pressed }) => [styles.repeatButton, pressed && styles.pressed]}><CopyPlus color={colors.forest} size={19} /><View style={styles.repeatCopy}><Text style={styles.repeatTitle}>Repeat transaction</Text><Text style={styles.repeatText}>Review a copy with today’s date before saving</Text></View></Pressable>
           <Text style={styles.savedAt}>Saved {formatDisplayDate(transaction.createdAt)}</Text>
         </View>
       ) : null}
@@ -145,5 +146,10 @@ const styles = StyleSheet.create({
   noteBox: { backgroundColor: colors.background, borderRadius: radii.sm, marginTop: spacing.xl, padding: spacing.md },
   noteLabel: { color: colors.textMuted, fontFamily: fontFamily.medium, fontSize: 12 },
   note: { color: colors.text, fontFamily: fontFamily.regular, fontSize: 15, lineHeight: 22, marginTop: spacing.xs },
+  repeatButton: { alignItems: 'center', backgroundColor: colors.forestSoft, borderRadius: radii.md, flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md, minHeight: 64, padding: spacing.md },
+  repeatCopy: { flex: 1 },
+  repeatTitle: { color: colors.forest, fontFamily: fontFamily.semiBold, fontSize: 14 },
+  repeatText: { color: colors.forestDark, fontFamily: fontFamily.regular, fontSize: 11, marginTop: 3 },
+  pressed: { opacity: 0.72 },
   savedAt: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 12, marginTop: spacing.md, textAlign: 'center' },
 });

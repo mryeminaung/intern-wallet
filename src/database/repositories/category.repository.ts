@@ -10,6 +10,10 @@ type CategoryRow = {
   is_default: number;
 };
 
+type CategoryUsageRow = CategoryRow & { last_used_at: string | null };
+
+export type TransactionEntryCategory = Category & { lastUsedAt: string | null };
+
 export interface CategoryRepository {
   list(type?: TransactionType): Promise<readonly Category[]>;
   getById(id: string): Promise<Category | null>;
@@ -28,6 +32,10 @@ function mapCategory(row: CategoryRow): Category {
   };
 }
 
+function mapTransactionEntryCategory(row: CategoryUsageRow): TransactionEntryCategory {
+  return { ...mapCategory(row), lastUsedAt: row.last_used_at };
+}
+
 export class SqliteCategoryRepository implements CategoryRepository {
   public constructor(private readonly database: SQLiteDatabase) {}
 
@@ -42,6 +50,22 @@ export class SqliteCategoryRepository implements CategoryRepository {
         );
 
     return rows.map(mapCategory);
+  }
+
+  public async listForTransactionEntry(): Promise<readonly TransactionEntryCategory[]> {
+    const rows = await this.database.getAllAsync<CategoryUsageRow>(
+      `SELECT c.id, c.name, c.icon, c.type, c.is_default,
+              MAX(t.created_at) AS last_used_at
+       FROM categories c
+       LEFT JOIN transactions t ON t.category_id = c.id AND t.type = c.type
+       GROUP BY c.id, c.name, c.icon, c.type, c.is_default
+       ORDER BY c.type ASC,
+                CASE WHEN MAX(t.created_at) IS NULL THEN 1 ELSE 0 END ASC,
+                MAX(t.created_at) DESC,
+                c.is_default DESC,
+                c.name ASC`,
+    );
+    return rows.map(mapTransactionEntryCategory);
   }
 
   public async getById(id: string): Promise<Category | null> {

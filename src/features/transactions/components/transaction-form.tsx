@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -31,6 +31,9 @@ type TransactionFormProps = {
   submitLabel: string;
   submitting: boolean;
   error: string | null;
+  autoFocusAmount?: boolean;
+  recentCategoryIds?: Partial<Record<TransactionType, readonly string[]>>;
+  preferredCategoryIds?: Partial<Record<TransactionType, string>>;
   onSubmit: (values: TransactionFormValues) => Promise<void>;
 };
 
@@ -48,6 +51,9 @@ export function TransactionForm({
   submitLabel,
   submitting,
   error,
+  autoFocusAmount = false,
+  recentCategoryIds,
+  preferredCategoryIds,
   onSubmit,
 }: TransactionFormProps): React.JSX.Element {
   const [datePicker, setDatePicker] = useState(false);
@@ -63,6 +69,7 @@ export function TransactionForm({
     mode: 'onSubmit',
   });
   const selectedType = watch('type');
+  const previousType = useRef(selectedType);
   const selectedCategoryId = watch('categoryId');
   const selectedDate = watch('date');
   const selectedCategory = useMemo(
@@ -71,10 +78,13 @@ export function TransactionForm({
   );
 
   useEffect(() => {
-    if (selectedCategory && selectedCategory.type !== selectedType) {
+    if (previousType.current !== selectedType) {
+      setValue('categoryId', preferredCategoryIds?.[selectedType] ?? '');
+      previousType.current = selectedType;
+    } else if (selectedCategory && selectedCategory.type !== selectedType) {
       setValue('categoryId', '');
     }
-  }, [selectedCategory, selectedType, setValue]);
+  }, [preferredCategoryIds, selectedCategory, selectedType, setValue]);
 
   const handleDateChange = (date: Date): void => {
     setDatePicker(false);
@@ -125,7 +135,7 @@ export function TransactionForm({
               <Text style={styles.currencyPrefix}>MMK</Text>
               <TextInput
                 accessibilityLabel="Amount in MMK"
-                autoFocus={false}
+                autoFocus={autoFocusAmount}
                 editable={!submitting}
                 keyboardType="number-pad"
                 onBlur={field.onBlur}
@@ -141,7 +151,7 @@ export function TransactionForm({
         {errors.amount ? <Text style={styles.errorText}>{errors.amount.message}</Text> : null}
 
         <Text style={styles.label}>Category</Text>
-        <CategorySelector categories={categories} onChange={(categoryId) => setValue('categoryId', categoryId, { shouldValidate: true })} type={selectedType} value={selectedCategoryId} />
+        <CategorySelector categories={categories} onChange={(categoryId) => setValue('categoryId', categoryId, { shouldValidate: true })} recentCategoryIds={recentCategoryIds?.[selectedType]} type={selectedType} value={selectedCategoryId} />
         {errors.categoryId ? <Text style={styles.errorText}>{errors.categoryId.message}</Text> : null}
 
         <Text style={styles.label}>Date</Text>
