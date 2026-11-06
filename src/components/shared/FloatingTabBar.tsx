@@ -1,5 +1,6 @@
 import type { BottomTabBarProps } from 'expo-router/build/layouts/Tabs';
-import { ChartNoAxesCombined, House, ReceiptText, Settings, type LucideIcon } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { ChartNoAxesCombined, House, Plus, ReceiptText, Target, type LucideIcon } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../../theme/colors';
@@ -10,17 +11,18 @@ const tabIcons: Record<string, LucideIcon> = {
   index: House,
   transactions: ReceiptText,
   reports: ChartNoAxesCombined,
-  settings: Settings,
+  plan: Target,
 };
 
 const tabLabels: Record<string, string> = {
-  index: 'Home',
-  transactions: 'Transactions',
-  reports: 'Reports',
-  settings: 'Settings',
+  index: 'Today',
+  transactions: 'Activity',
+  reports: 'Insights',
+  plan: 'Plan',
 };
 
 export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, insets }: BottomTabBarProps): React.JSX.Element {
+  const router = useRouter();
   const contextInsets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, contextInsets.bottom);
 
@@ -53,19 +55,23 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, ins
             }
           };
 
-          return (
-            <Pressable
+          const tab = <Pressable
               accessibilityLabel={accessibilityLabel}
               accessibilityRole="tab"
               accessibilityState={{ selected: isFocused }}
               key={route.key}
               onPress={onPress}
-              style={({ pressed }) => [styles.item, isFocused && styles.itemActive, pressed && styles.itemPressed]}
+              style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
             >
-              <Icon color={isFocused ? colors.white : '#87938A'} size={22} strokeWidth={2.2} />
-              {isFocused ? <Text style={styles.label}>{label}</Text> : null}
-            </Pressable>
-          );
+              <View style={[styles.iconWrap, isFocused && styles.iconWrapActive]}><Icon color={isFocused ? colors.white : '#87938A'} size={21} strokeWidth={2.2} /></View>
+              <Text style={[styles.label, isFocused && styles.labelActive]}>{label}</Text>
+            </Pressable>;
+
+          if (index === 2) {
+            return <View key={route.key} style={styles.segment}><Pressable accessibilityLabel="Add transaction" accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={({ pressed }) => [styles.addButton, pressed && styles.itemPressed]}><Plus color={colors.white} size={27} strokeWidth={2.4} /></Pressable><Text style={styles.addLabel}>Add</Text>{tab}</View>;
+          }
+
+          return tab;
         })}
       </View>
     </View>
@@ -84,22 +90,29 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(226, 231, 225, 0.96)',
     borderRadius: 30,
     flexDirection: 'row',
-    minHeight: 66,
+    minHeight: 74,
     paddingHorizontal: spacing.xs,
     paddingVertical: spacing.xs,
     ...shadows.floating,
   },
   item: {
     alignItems: 'center',
-    borderRadius: 24,
     flex: 1,
-    gap: 3,
+    gap: 2,
     justifyContent: 'center',
-    minHeight: 52,
-    paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.sm,
+    minHeight: 60,
+    minWidth: 0,
+    paddingHorizontal: 2,
+    paddingVertical: spacing.xs,
   },
-  itemActive: {
+  iconWrap: {
+    alignItems: 'center',
+    borderRadius: 13,
+    height: 38,
+    justifyContent: 'center',
+    width: 38,
+  },
+  iconWrapActive: {
     backgroundColor: colors.forest,
   },
   itemPressed: {
@@ -107,7 +120,39 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: fontFamily.medium,
-    fontSize: 11,
-    color: colors.white,
+    fontSize: 10,
+    color: '#87938A',
+  },
+  labelActive: {
+    color: colors.forest,
+    fontFamily: fontFamily.semiBold,
+  },
+  segment: {
+    alignItems: 'center',
+    flex: 2,
+    flexDirection: 'row',
+  },
+  addButton: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: colors.forest,
+    borderColor: colors.background,
+    borderRadius: 99,
+    borderWidth: 5,
+    height: 62,
+    justifyContent: 'center',
+    marginTop: -19,
+    width: 62,
+    ...shadows.floating,
+  },
+  addLabel: {
+    color: colors.forest,
+    fontFamily: fontFamily.semiBold,
+    fontSize: 10,
+    left: 0,
+    position: 'absolute',
+    top: 45,
+    width: 62,
+    textAlign: 'center',
   },
 });

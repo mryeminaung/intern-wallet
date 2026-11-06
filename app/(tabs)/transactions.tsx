@@ -85,7 +85,7 @@ export default function TransactionsScreen(): React.JSX.Element {
   return <Screen>
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.headerRow}>
-        <View style={styles.headerCopy}><Text style={styles.eyebrow}>MONEY LOG</Text><Text style={styles.title}>Transactions</Text><Text style={styles.subtitle}>Track where your money goes.</Text></View>
+        <View style={styles.headerCopy}><Text style={styles.eyebrow}>MONEY LOG</Text><Text style={styles.title}>Activity</Text><Text style={styles.subtitle}>Every income and expense, in one place.</Text></View>
         <Pressable accessibilityLabel="Add transaction" accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}><Plus color={colors.white} size={22} /></Pressable>
       </View>
 

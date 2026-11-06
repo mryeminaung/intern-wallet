@@ -58,8 +58,8 @@ export default function ReportsScreen(): React.JSX.Element {
 
   return <Screen><ScrollView contentContainerStyle={styles.content}>
     <Text style={styles.eyebrow}>MONEY STORIES</Text>
-    <Text style={styles.title}>Reports</Text>
-    <Text style={styles.subtitle}>Understand your spending habits.</Text>
+    <Text style={styles.title}>Insights</Text>
+    <Text style={styles.subtitle}>Understand what changed and what to do next.</Text>
 
     <View style={styles.modeRow}>{([['month', 'Month'], ['week', 'Week'], ['year', 'Year'], ['custom', 'Custom']] as const).map(([value, label]) => <Pressable accessibilityRole="button" key={value} onPress={() => changeMode(value)} style={[styles.modeChip, mode === value && styles.modeSelected]}><Text style={[styles.modeText, mode === value && styles.modeTextSelected]}>{label}</Text></Pressable>)}</View>
     {mode === 'custom' ? <View style={styles.customDateRow}><DateButton label={formatDisplayDate(customFrom.toISOString())} onPress={() => setPicker('from')} /><DateButton label={formatDisplayDate(customTo.toISOString())} onPress={() => setPicker('to')} /></View> : null}

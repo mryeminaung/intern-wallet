@@ -16,10 +16,10 @@ export default function TabsLayout(): React.JSX.Element {
         },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Home' }} />
-      <Tabs.Screen name="transactions" options={{ title: 'Transactions' }} />
-      <Tabs.Screen name="reports" options={{ title: 'Reports' }} />
-      <Tabs.Screen name="settings" options={{ title: 'Settings' }} />
+      <Tabs.Screen name="index" options={{ title: 'Today' }} />
+      <Tabs.Screen name="transactions" options={{ title: 'Activity' }} />
+      <Tabs.Screen name="reports" options={{ title: 'Insights' }} />
+      <Tabs.Screen name="plan" options={{ title: 'Plan' }} />
     </Tabs>
   );
 }
