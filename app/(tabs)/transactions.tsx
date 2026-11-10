@@ -2,8 +2,9 @@ import { useCallback, useMemo, useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react-native';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Screen } from '../../src/components/shared/Screen';
+import { KeyboardDoneAccessory } from '../../src/components/shared/KeyboardDoneAccessory';
 import { TransactionFilter } from '../../src/features/transactions/components/transaction-filter';
 import { TransactionList } from '../../src/features/transactions/components/transaction-list';
 import { useTransactionCategories } from '../../src/features/transactions/hooks/use-transaction-categories';
@@ -18,6 +19,7 @@ import { radii, shadows, spacing } from '../../src/theme/spacing';
 import type { TransactionSort } from '../../src/database/repositories/transaction.repository';
 
 type FilterDate = 'from' | 'to' | null;
+const FILTER_KEYBOARD_ACCESSORY_ID = 'transaction-filter-keyboard';
 
 export default function TransactionsScreen(): React.JSX.Element {
   const router = useRouter();
@@ -83,7 +85,7 @@ export default function TransactionsScreen(): React.JSX.Element {
   };
 
   return <Screen>
-    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={styles.content} keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
       <View style={styles.headerRow}>
         <View style={styles.headerCopy}><Text style={styles.eyebrow}>MONEY LOG</Text><Text style={styles.title}>Activity</Text><Text style={styles.subtitle}>Every income and expense, in one place.</Text></View>
         <Pressable accessibilityLabel="Add transaction" accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}><Plus color={colors.white} size={22} /></Pressable>
@@ -110,20 +112,21 @@ export default function TransactionsScreen(): React.JSX.Element {
     <Modal animationType="slide" onRequestClose={() => setAdvancedOpen(false)} transparent visible={advancedOpen}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalOverlay}>
         <View style={styles.sheet}>
-          <View style={styles.sheetHeader}><View><Text style={styles.sheetTitle}>More filters</Text><Text style={styles.sheetSubtitle}>Narrow down this month’s activity.</Text></View><Pressable accessibilityLabel="Close filters" onPress={() => setAdvancedOpen(false)} style={styles.closeButton}><X color={colors.textMuted} size={20} /></Pressable></View>
-          <ScrollView contentContainerStyle={styles.sheetContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <View style={styles.sheetHeader}><View><Text style={styles.sheetTitle}>More filters</Text><Text style={styles.sheetSubtitle}>Narrow down this month’s activity.</Text></View><Pressable accessibilityLabel="Close filters" onPress={() => { Keyboard.dismiss(); setAdvancedOpen(false); }} style={styles.closeButton}><X color={colors.textMuted} size={20} /></Pressable></View>
+          <ScrollView contentContainerStyle={styles.sheetContent} keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Text style={styles.fieldLabel}>Category</Text>
             <ScrollView contentContainerStyle={styles.chipRow} horizontal showsHorizontalScrollIndicator={false}><Pressable onPress={() => setCategoryId(null)} style={[styles.sheetChip, !categoryId && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, !categoryId && styles.sheetChipTextSelected]}>All categories</Text></Pressable>{categories.map((category) => <Pressable key={category.id} onPress={() => setCategoryId(category.id)} style={[styles.sheetChip, categoryId === category.id && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, categoryId === category.id && styles.sheetChipTextSelected]}>{category.icon} {category.name}</Text></Pressable>)}</ScrollView>
 
             <Text style={styles.fieldLabel}>Date range</Text>
-            <View style={styles.dateRow}><Pressable onPress={() => setFilterDate('from')} style={styles.dateButton}><CalendarDays color={colors.forest} size={16} /><Text style={styles.dateButtonText}>{fromDate ? formatDisplayDate(fromDate.toISOString()) : 'Start date'}</Text></Pressable><Pressable onPress={() => setFilterDate('to')} style={styles.dateButton}><CalendarDays color={colors.forest} size={16} /><Text style={styles.dateButtonText}>{toDate ? formatDisplayDate(toDate.toISOString()) : 'End date'}</Text></Pressable></View>
+            <View style={styles.dateRow}><Pressable onPress={() => { Keyboard.dismiss(); setFilterDate('from'); }} style={styles.dateButton}><CalendarDays color={colors.forest} size={16} /><Text style={styles.dateButtonText}>{fromDate ? formatDisplayDate(fromDate.toISOString()) : 'Start date'}</Text></Pressable><Pressable onPress={() => { Keyboard.dismiss(); setFilterDate('to'); }} style={styles.dateButton}><CalendarDays color={colors.forest} size={16} /><Text style={styles.dateButtonText}>{toDate ? formatDisplayDate(toDate.toISOString()) : 'End date'}</Text></Pressable></View>
 
             <Text style={styles.fieldLabel}>Amount range · MMK</Text>
-            <View style={styles.amountRow}><TextInput accessibilityLabel="Minimum amount" keyboardType="number-pad" onChangeText={setMinAmount} placeholder="Minimum" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={minAmount} /><Text style={styles.amountDash}>—</Text><TextInput accessibilityLabel="Maximum amount" keyboardType="number-pad" onChangeText={setMaxAmount} placeholder="Maximum" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={maxAmount} /></View>
+            <View style={styles.amountRow}><TextInput accessibilityLabel="Minimum amount" inputAccessoryViewID={FILTER_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={setMinAmount} placeholder="Minimum" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={minAmount} /><Text style={styles.amountDash}>—</Text><TextInput accessibilityLabel="Maximum amount" inputAccessoryViewID={FILTER_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={setMaxAmount} placeholder="Maximum" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={maxAmount} /></View>
 
             <Text style={styles.fieldLabel}>Sort by</Text>
             <View style={styles.sortRow}>{([['newest', 'Newest'], ['oldest', 'Oldest'], ['highest', 'Highest amount'], ['lowest', 'Lowest amount']] as const).map(([value, label]) => <Pressable key={value} onPress={() => setSort(value)} style={[styles.sortChip, sort === value && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, sort === value && styles.sheetChipTextSelected]}>{label}</Text></Pressable>)}</View>
-            <Pressable accessibilityRole="button" onPress={() => setAdvancedOpen(false)} style={styles.applyButton}><Text style={styles.applyButtonText}>Done</Text></Pressable>
+            <Pressable accessibilityRole="button" onPress={() => { Keyboard.dismiss(); setAdvancedOpen(false); }} style={styles.applyButton}><Text style={styles.applyButtonText}>Done</Text></Pressable>
+            <KeyboardDoneAccessory nativeID={FILTER_KEYBOARD_ACCESSORY_ID} />
           </ScrollView>
         </View>
       </KeyboardAvoidingView>

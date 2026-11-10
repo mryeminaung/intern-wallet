@@ -5,15 +5,15 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { CalendarDays, ChevronDown } from 'lucide-react-native';
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  Keyboard,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { KeyboardAwareScrollView } from '../../../components/shared/KeyboardAwareScrollView';
+import { KeyboardDoneAccessory } from '../../../components/shared/KeyboardDoneAccessory';
 import { formatDisplayDate } from '../../../lib/date';
 import { colors } from '../../../theme/colors';
 import { radii, spacing } from '../../../theme/spacing';
@@ -44,6 +44,8 @@ const defaultValues: TransactionFormValues = {
   date: new Date().toISOString(),
   note: '',
 };
+
+const TRANSACTION_KEYBOARD_ACCESSORY_ID = 'transaction-form-keyboard';
 
 export function TransactionForm({
   categories,
@@ -92,15 +94,12 @@ export function TransactionForm({
   };
 
   const handleFormSubmit = (values: TransactionFormValues): void => {
+    Keyboard.dismiss();
     void onSubmit(values);
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.keyboardContainer}
-    >
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+    <KeyboardAwareScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.label}>Type</Text>
         <Controller
           control={control}
@@ -137,6 +136,7 @@ export function TransactionForm({
                 accessibilityLabel="Amount in MMK"
                 autoFocus={autoFocusAmount}
                 editable={!submitting}
+                inputAccessoryViewID={TRANSACTION_KEYBOARD_ACCESSORY_ID}
                 keyboardType="number-pad"
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
@@ -162,7 +162,7 @@ export function TransactionForm({
             <>
               <Pressable
                 accessibilityRole="button"
-                onPress={() => setDatePicker(true)}
+                onPress={() => { Keyboard.dismiss(); setDatePicker(true); }}
                 style={styles.selectField}
               >
                 <CalendarDays color={colors.forest} size={20} />
@@ -211,13 +211,12 @@ export function TransactionForm({
         >
           {submitting ? <ActivityIndicator color={colors.white} /> : <Text style={styles.submitText}>{submitLabel}</Text>}
         </Pressable>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      <KeyboardDoneAccessory nativeID={TRANSACTION_KEYBOARD_ACCESSORY_ID} />
+    </KeyboardAwareScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  keyboardContainer: { flex: 1 },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
   label: { color: colors.text, fontFamily: fontFamily.medium, fontSize: 14, marginBottom: spacing.sm, marginTop: spacing.md },
   segmentedControl: { backgroundColor: colors.forestSoft, borderRadius: radii.md, flexDirection: 'row', padding: spacing.xs },

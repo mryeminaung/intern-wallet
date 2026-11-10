@@ -3,13 +3,16 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { CalendarDays } from 'lucide-react-native';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardDoneAccessory } from '../../../components/shared/KeyboardDoneAccessory';
 import { formatMonth } from '../../../lib/date';
 import { colors } from '../../../theme/colors';
 import { radii, shadows, spacing } from '../../../theme/spacing';
 import { fontFamily } from '../../../theme/typography';
 import type { Category } from '../../../types/common';
 import { budgetFormSchema, type BudgetFormValues } from '../schemas/budget.schema';
+
+const BUDGET_KEYBOARD_ACCESSORY_ID = 'budget-form-keyboard';
 
 type BudgetFormProps = {
   categories: readonly Category[];
@@ -39,7 +42,7 @@ export function BudgetForm({ categories, isEditing, initialValues, submitting, e
     <View style={styles.formCard}>
       <Text style={styles.formTitle}>{isEditing ? 'Edit budget' : 'New budget'}</Text>
       <Text style={styles.label}>Month</Text>
-      <Pressable onPress={() => setShowMonthPicker(true)} style={styles.field}><CalendarDays color={colors.forest} size={19} /><Text style={styles.fieldText}>{month}</Text></Pressable>
+      <Pressable onPress={() => { Keyboard.dismiss(); setShowMonthPicker(true); }} style={styles.field}><CalendarDays color={colors.forest} size={19} /><Text style={styles.fieldText}>{month}</Text></Pressable>
       {showMonthPicker ? <DateTimePicker mode="date" onDismiss={() => setShowMonthPicker(false)} onValueChange={(_event, date) => handleDateChange(date)} value={new Date(`${month}-01T12:00:00`)} /> : null}
 
       <Text style={styles.label}>Budget scope</Text>
@@ -49,14 +52,15 @@ export function BudgetForm({ categories, isEditing, initialValues, submitting, e
       </ScrollView>
 
       <Text style={styles.label}>Monthly limit</Text>
-      <Controller control={control} name="amount" render={({ field }) => <View style={styles.amountField}><Text style={styles.currency}>MMK</Text><TextInput editable={!submitting} keyboardType="number-pad" onBlur={field.onBlur} onChangeText={field.onChange} placeholder="0" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={field.value} /></View>} />
+      <Controller control={control} name="amount" render={({ field }) => <View style={styles.amountField}><Text style={styles.currency}>MMK</Text><TextInput editable={!submitting} inputAccessoryViewID={BUDGET_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onBlur={field.onBlur} onChangeText={field.onChange} placeholder="0" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={field.value} /></View>} />
       {errors.amount ? <Text style={styles.error}>{errors.amount.message}</Text> : null}
       {errors.month ? <Text style={styles.error}>{errors.month.message}</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <View style={styles.formActions}>
         <Pressable disabled={submitting} onPress={onCancel} style={styles.cancelButton}><Text style={styles.cancelText}>Cancel</Text></Pressable>
-        <Pressable disabled={submitting} onPress={() => { void handleSubmit((values) => onSubmit(values))(); }} style={styles.saveButton}>{submitting ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveText}>Save budget</Text>}</Pressable>
+        <Pressable disabled={submitting} onPress={() => { Keyboard.dismiss(); void handleSubmit((values) => onSubmit(values))(); }} style={styles.saveButton}>{submitting ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveText}>Save budget</Text>}</Pressable>
       </View>
+      <KeyboardDoneAccessory nativeID={BUDGET_KEYBOARD_ACCESSORY_ID} />
     </View>
   );
 }

@@ -3,8 +3,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { CalendarDays, Check, ChevronLeft, ShieldCheck, Sparkles, WalletCards } from 'lucide-react-native';
-import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Screen } from '../src/components/shared/Screen';
+import { KeyboardAwareScrollView } from '../src/components/shared/KeyboardAwareScrollView';
+import { KeyboardDoneAccessory } from '../src/components/shared/KeyboardDoneAccessory';
 import { SqliteCategoryRepository } from '../src/database/repositories/category.repository';
 import { SqliteSettingsRepository } from '../src/database/repositories/settings.repository';
 import { SqliteTransactionRepository } from '../src/database/repositories/transaction.repository';
@@ -17,6 +19,7 @@ import { radii, shadows, spacing } from '../src/theme/spacing';
 import { fontFamily } from '../src/theme/typography';
 
 type PickerField = 'start' | 'end' | null;
+const ONBOARDING_KEYBOARD_ACCESSORY_ID = 'onboarding-keyboard';
 
 export default function OnboardingScreen(): React.JSX.Element {
   const router = useRouter();
@@ -49,6 +52,7 @@ export default function OnboardingScreen(): React.JSX.Element {
   };
 
   const next = (): void => {
+    Keyboard.dismiss();
     setError(null);
     if (step === 1 && calendarDaysInclusive(startDate, endDate) === 0) {
       setError('The internship end date must be on or after the start date.');
@@ -63,6 +67,7 @@ export default function OnboardingScreen(): React.JSX.Element {
   };
 
   const finish = async (): Promise<void> => {
+    Keyboard.dismiss();
     const balance = parseAmount(startingBalance);
     const limit = dailyLimit.trim() ? parsePositiveAmount(dailyLimit) : null;
     if (balance === null) { setError('Enter a valid starting balance.'); return; }
@@ -88,7 +93,7 @@ export default function OnboardingScreen(): React.JSX.Element {
     finally { setBusy(false); }
   };
 
-  return <Screen><KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+  return <Screen><KeyboardAwareScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
     <View style={styles.topBar}>{step > 0 ? <Pressable accessibilityLabel="Previous step" accessibilityRole="button" disabled={busy} onPress={() => { setStep((current) => Math.max(0, current - 1)); setError(null); }} style={styles.back}><ChevronLeft color={colors.text} size={22} /></Pressable> : <View style={styles.back} />}<View style={styles.progress}><View style={[styles.progressFill, { width: `${(step + 1) * 25}%` }]} /></View><Pressable accessibilityRole="button" disabled={busy} onPress={() => { void skip(); }}><Text style={styles.skip}>Skip</Text></Pressable></View>
 
     {step === 0 ? <WelcomeStep /> : null}
@@ -100,7 +105,8 @@ export default function OnboardingScreen(): React.JSX.Element {
     <Pressable accessibilityRole="button" disabled={busy} onPress={() => { if (step === 3) void finish(); else next(); }} style={[styles.primary, busy && styles.disabled]}>{busy ? <ActivityIndicator color={colors.white} /> : <><Text style={styles.primaryText}>{step === 0 ? 'Set up my wallet' : step === 3 ? 'Start using Intern Wallet' : 'Continue'}</Text>{step === 3 ? <Check color={colors.white} size={18} /> : null}</>}</Pressable>
     {step === 0 ? <Text style={styles.footnote}>Takes about a minute. You can change everything later from Plan.</Text> : null}
     {picker ? <DateTimePicker minimumDate={picker === 'end' ? startDate : undefined} mode="date" onDismiss={() => setPicker(null)} onValueChange={(_event, date) => handleDateChange(date)} value={picker === 'start' ? startDate : endDate} /> : null}
-  </ScrollView></KeyboardAvoidingView></Screen>;
+    <KeyboardDoneAccessory nativeID={ONBOARDING_KEYBOARD_ACCESSORY_ID} />
+  </KeyboardAwareScrollView></Screen>;
 }
 
 function WelcomeStep(): React.JSX.Element {
@@ -112,11 +118,11 @@ function DatesStep({ startDate, endDate, onOpenPicker }: { startDate: Date; endD
 }
 
 function BalanceStep({ value, onChange }: { value: string; onChange: (value: string) => void }): React.JSX.Element {
-  return <View style={styles.step}><View style={styles.stepIcon}><WalletCards color={colors.forest} size={24} /></View><Text style={styles.eyebrow}>STEP 2 OF 3</Text><Text style={styles.title}>How much money is available now?</Text><Text style={styles.subtitle}>Include savings or cash you can use during the internship. You can leave this empty and add income later.</Text><Text style={styles.label}>Starting balance</Text><View style={styles.amountField}><Text style={styles.currency}>MMK</Text><TextInput accessibilityLabel="Starting balance in MMK" autoFocus keyboardType="number-pad" onChangeText={onChange} placeholder="0" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={value} /></View><Text style={styles.helper}>This will be saved once as Personal Savings with the note “Opening balance.”</Text></View>;
+  return <View style={styles.step}><View style={styles.stepIcon}><WalletCards color={colors.forest} size={24} /></View><Text style={styles.eyebrow}>STEP 2 OF 3</Text><Text style={styles.title}>How much money is available now?</Text><Text style={styles.subtitle}>Include savings or cash you can use during the internship. You can leave this empty and add income later.</Text><Text style={styles.label}>Starting balance</Text><View style={styles.amountField}><Text style={styles.currency}>MMK</Text><TextInput accessibilityLabel="Starting balance in MMK" autoFocus inputAccessoryViewID={ONBOARDING_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={onChange} placeholder="0" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={value} /></View><Text style={styles.helper}>This will be saved once as Personal Savings with the note “Opening balance.”</Text></View>;
 }
 
 function PlanStep({ startingBalance, recommendation, dailyLimit, days, onChange }: { startingBalance: number; recommendation: number; dailyLimit: string; days: number; onChange: (value: string) => void }): React.JSX.Element {
-  return <View style={styles.step}><View style={styles.stepIcon}><Sparkles color={colors.forest} size={24} /></View><Text style={styles.eyebrow}>STEP 3 OF 3</Text><Text style={styles.title}>Your starting daily plan</Text><Text style={styles.subtitle}>This is a guide, not a restriction. Adjust it whenever your situation changes.</Text><View style={styles.recommendation}><Text style={styles.recommendationLabel}>RECOMMENDED PER DAY</Text><Text style={styles.recommendationAmount}>{formatMMK(recommendation)}</Text><Text style={styles.recommendationText}>{formatMMK(startingBalance)} across {Math.max(0, days)} spending days</Text></View><Text style={styles.label}>Daily limit (optional)</Text><View style={styles.amountField}><Text style={styles.currency}>MMK</Text><TextInput accessibilityLabel="Daily spending limit in MMK" keyboardType="number-pad" onChangeText={onChange} placeholder="Add later" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={dailyLimit} /></View></View>;
+  return <View style={styles.step}><View style={styles.stepIcon}><Sparkles color={colors.forest} size={24} /></View><Text style={styles.eyebrow}>STEP 3 OF 3</Text><Text style={styles.title}>Your starting daily plan</Text><Text style={styles.subtitle}>This is a guide, not a restriction. Adjust it whenever your situation changes.</Text><View style={styles.recommendation}><Text style={styles.recommendationLabel}>RECOMMENDED PER DAY</Text><Text style={styles.recommendationAmount}>{formatMMK(recommendation)}</Text><Text style={styles.recommendationText}>{formatMMK(startingBalance)} across {Math.max(0, days)} spending days</Text></View><Text style={styles.label}>Daily limit (optional)</Text><View style={styles.amountField}><Text style={styles.currency}>MMK</Text><TextInput accessibilityLabel="Daily spending limit in MMK" inputAccessoryViewID={ONBOARDING_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={onChange} placeholder="Add later" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={dailyLimit} /></View></View>;
 }
 
 function DateButton({ date, onPress }: { date: Date; onPress: () => void }): React.JSX.Element {
@@ -136,7 +142,6 @@ function parsePositiveAmount(value: string): number | null {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   content: { flexGrow: 1, padding: spacing.lg, paddingBottom: spacing.xxl },
   topBar: { alignItems: 'center', flexDirection: 'row', gap: spacing.md, justifyContent: 'space-between' },
   back: { alignItems: 'center', height: 42, justifyContent: 'center', width: 42 },

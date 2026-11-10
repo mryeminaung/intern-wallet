@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowLeft, ChevronLeft, ChevronRight, Plus } from 'lucide-react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Screen } from '../src/components/shared/Screen';
+import { KeyboardAwareScrollView } from '../src/components/shared/KeyboardAwareScrollView';
 import { BudgetForm } from '../src/features/budget/components/budget-form';
 import { BudgetCard } from '../src/features/budget/components/budget-card';
 import { CategoryBudgetItem } from '../src/features/budget/components/category-budget-item';
@@ -104,7 +105,7 @@ export default function BudgetScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <KeyboardAwareScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Pressable accessibilityLabel="Go back" onPress={() => router.back()} style={styles.iconButton}><ArrowLeft color={colors.text} size={22} /></Pressable>
           <Text style={styles.title}>Budgets</Text>
@@ -123,7 +124,7 @@ export default function BudgetScreen(): React.JSX.Element {
         {!loading && !formOpen && summary?.budgets.length === 0 ? <View style={styles.empty}><Text style={styles.emptyIcon}>🎯</Text><Text style={styles.emptyTitle}>No budgets for this month</Text><Text style={styles.emptyText}>Set an overall limit or a category limit to make your spending visible.</Text><Pressable onPress={openNew} style={styles.emptyButton}><Text style={styles.emptyButtonText}>Create a budget</Text></Pressable></View> : null}
         {overall ? <View style={styles.section}><Text style={styles.sectionTitle}>Overall</Text><BudgetCard budget={overall} onDelete={() => deleteBudget(overall)} onEdit={() => openEdit(overall)} /></View> : null}
         {categoryBudgets.length > 0 ? <View style={styles.section}><Text style={styles.sectionTitle}>Category budgets</Text>{categoryBudgets.map((budget) => <CategoryBudgetItem budget={budget} key={budget.id} onDelete={() => deleteBudget(budget)} onEdit={() => openEdit(budget)} />)}</View> : null}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Screen>
   );
 }

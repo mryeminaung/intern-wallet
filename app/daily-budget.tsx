@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ArrowLeft, CalendarDays } from 'lucide-react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useRouter } from 'expo-router';
 import { Screen } from '../src/components/shared/Screen';
+import { KeyboardAwareScrollView } from '../src/components/shared/KeyboardAwareScrollView';
+import { KeyboardDoneAccessory } from '../src/components/shared/KeyboardDoneAccessory';
 import { SqliteSettingsRepository } from '../src/database/repositories/settings.repository';
 import { settingKeys } from '../src/lib/constants';
 import { formatDisplayDate, startOfDayIso } from '../src/lib/date';
 import { colors } from '../src/theme/colors';
 import { fontFamily } from '../src/theme/typography';
 import { radii, spacing } from '../src/theme/spacing';
+
+const DAILY_BUDGET_KEYBOARD_ACCESSORY_ID = 'daily-budget-keyboard';
 
 type PickerMode = 'start' | 'end' | null;
 
@@ -58,6 +62,7 @@ export default function DailyBudgetScreen(): React.JSX.Element {
   };
 
   const save = async (): Promise<void> => {
+    Keyboard.dismiss();
     setError(null);
     const parsedLimit = dailyLimit.trim() ? Number(dailyLimit) : null;
     if (parsedLimit !== null && (!Number.isSafeInteger(parsedLimit) || parsedLimit <= 0)) {
@@ -92,25 +97,25 @@ export default function DailyBudgetScreen(): React.JSX.Element {
     }
   };
 
-  return <Screen><KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+  return <Screen><KeyboardAwareScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
     <View style={styles.header}><Pressable accessibilityLabel="Go back" onPress={() => router.back()} style={styles.back}><ArrowLeft color={colors.text} size={22} /></Pressable><Text style={styles.title}>Daily budget</Text><View style={styles.headerSpacer} /></View>
     <Text style={styles.subtitle}>Set a simple daily limit and track your four-month internship safely.</Text>
     {loading ? <ActivityIndicator color={colors.forest} style={styles.loading} /> : <View style={styles.form}>
       <Text style={styles.label}>Daily spending limit · MMK</Text>
-      <TextInput accessibilityLabel="Daily spending limit" keyboardType="number-pad" onChangeText={setDailyLimit} placeholder="For example, 15000" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={dailyLimit} />
+      <TextInput accessibilityLabel="Daily spending limit" inputAccessoryViewID={DAILY_BUDGET_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={setDailyLimit} placeholder="For example, 15000" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={dailyLimit} />
       <Text style={styles.help}>This resets each day using your device’s local calendar. Exceeding it will show a warning, but expenses are never blocked.</Text>
 
       <Text style={styles.label}>Internship dates</Text>
-      <View style={styles.dateRow}><Pressable onPress={() => setPicker('start')} style={styles.dateButton}><CalendarDays color={colors.forest} size={18} /><Text style={styles.dateText}>{startDate ? formatDisplayDate(startDate.toISOString()) : 'Start date'}</Text></Pressable><Pressable onPress={() => setPicker('end')} style={styles.dateButton}><CalendarDays color={colors.forest} size={18} /><Text style={styles.dateText}>{endDate ? formatDisplayDate(endDate.toISOString()) : 'End date'}</Text></Pressable></View>
+      <View style={styles.dateRow}><Pressable onPress={() => { Keyboard.dismiss(); setPicker('start'); }} style={styles.dateButton}><CalendarDays color={colors.forest} size={18} /><Text style={styles.dateText}>{startDate ? formatDisplayDate(startDate.toISOString()) : 'Start date'}</Text></Pressable><Pressable onPress={() => { Keyboard.dismiss(); setPicker('end'); }} style={styles.dateButton}><CalendarDays color={colors.forest} size={18} /><Text style={styles.dateText}>{endDate ? formatDisplayDate(endDate.toISOString()) : 'End date'}</Text></Pressable></View>
       <Text style={styles.help}>Dates power the internship progress, average daily spending, and suggested safe daily amount. They do not create recurring income.</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Pressable accessibilityRole="button" disabled={saving} onPress={() => { void save(); }} style={[styles.save, saving && styles.disabled]}>{saving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveText}>Save settings</Text>}</Pressable>
     </View>}
-  </ScrollView></KeyboardAvoidingView>{picker ? <DateTimePicker mode="date" onDismiss={() => setPicker(null)} onValueChange={(_event, date) => handleDateChange(date)} value={(picker === 'start' ? startDate : endDate) ?? new Date()} /> : null}</Screen>;
+    <KeyboardDoneAccessory nativeID={DAILY_BUDGET_KEYBOARD_ACCESSORY_ID} />
+  </KeyboardAwareScrollView>{picker ? <DateTimePicker mode="date" onDismiss={() => setPicker(null)} onValueChange={(_event, date) => handleDateChange(date)} value={(picker === 'start' ? startDate : endDate) ?? new Date()} /> : null}</Screen>;
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
   header: { alignItems: 'center', flexDirection: 'row' },
   back: { alignItems: 'center', height: 42, justifyContent: 'center', width: 42 },

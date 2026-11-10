@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useCallback, useMemo, useRef, useState, type ComponentRef } from 'react';
+import { ActivityIndicator, Alert, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ArrowLeft } from 'lucide-react-native';
 import { Screen } from '../src/components/shared/Screen';
+import { KeyboardAwareScrollView } from '../src/components/shared/KeyboardAwareScrollView';
 import { SqliteCategoryRepository } from '../src/database/repositories/category.repository';
 import { CategoryService } from '../src/features/categories/services/category.service';
 import type { Category, TransactionType } from '../src/types/common';
@@ -23,6 +24,7 @@ export default function CategoriesScreen(): React.JSX.Element {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const nameInputRef = useRef<ComponentRef<typeof TextInput>>(null);
   const refresh = useCallback(async () => {
     try { setCategories(await service.list()); setError(null); }
     catch { setError('Categories could not be loaded.'); }
@@ -32,6 +34,7 @@ export default function CategoriesScreen(): React.JSX.Element {
   const resetForm = (): void => { setEditing(null); setName(''); setIcon(''); };
   const save = async (): Promise<void> => {
     if (saving) return;
+    Keyboard.dismiss();
     setSaving(true);
     setError(null);
     try {
@@ -51,15 +54,15 @@ export default function CategoriesScreen(): React.JSX.Element {
     ]);
   };
 
-  return <Screen><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+  return <Screen><KeyboardAwareScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
     <View style={styles.header}><Pressable accessibilityLabel="Go back" onPress={() => router.back()} style={styles.back}><ArrowLeft color={colors.text} size={22} /></Pressable><Text style={styles.title}>Categories</Text></View>
     <Text style={styles.subtitle}>Create your own income and expense categories. Built-in categories stay available.</Text>
     <View style={styles.tabs}>{(['expense', 'income'] as const).map((value) => <Pressable key={value} onPress={() => { setType(value); resetForm(); }} style={[styles.tab, type === value && styles.selected]}><Text style={[styles.tabText, type === value && styles.selectedText]}>{value === 'expense' ? 'Expenses' : 'Income'}</Text></Pressable>)}</View>
-    <View style={styles.form}><Text style={styles.formTitle}>{editing ? `Edit ${editing.name}` : `New ${type} category`}</Text><View style={styles.inputs}><TextInput accessibilityLabel="Category icon" maxLength={8} onChangeText={setIcon} placeholder="Icon" placeholderTextColor={colors.textMuted} style={[styles.input, styles.iconInput]} value={icon} /><TextInput accessibilityLabel="Category name" maxLength={40} onChangeText={setName} placeholder="Name" placeholderTextColor={colors.textMuted} style={[styles.input, styles.nameInput]} value={name} /></View><View style={styles.actions}><Pressable disabled={saving} onPress={() => { void save(); }} style={styles.save}><Text style={styles.saveText}>{saving ? 'Saving…' : editing ? 'Save changes' : 'Add category'}</Text></Pressable>{editing ? <Pressable onPress={resetForm} style={styles.cancel}><Text style={styles.cancelText}>Cancel</Text></Pressable> : null}</View></View>
+    <View style={styles.form}><Text style={styles.formTitle}>{editing ? `Edit ${editing.name}` : `New ${type} category`}</Text><View style={styles.inputs}><TextInput accessibilityLabel="Category icon" blurOnSubmit={false} maxLength={8} onChangeText={setIcon} onSubmitEditing={() => nameInputRef.current?.focus()} placeholder="Icon" placeholderTextColor={colors.textMuted} returnKeyType="next" style={[styles.input, styles.iconInput]} value={icon} /><TextInput ref={nameInputRef} accessibilityLabel="Category name" maxLength={40} onChangeText={setName} onSubmitEditing={Keyboard.dismiss} placeholder="Name" placeholderTextColor={colors.textMuted} returnKeyType="done" style={[styles.input, styles.nameInput]} value={name} /></View><View style={styles.actions}><Pressable disabled={saving} onPress={() => { void save(); }} style={styles.save}><Text style={styles.saveText}>{saving ? 'Saving…' : editing ? 'Save changes' : 'Add category'}</Text></Pressable>{editing ? <Pressable onPress={resetForm} style={styles.cancel}><Text style={styles.cancelText}>Cancel</Text></Pressable> : null}</View></View>
     {error ? <Text style={styles.error}>{error}</Text> : null}
     {loading ? <ActivityIndicator color={colors.forest} style={styles.loading} /> : null}
     {categories.filter((category) => category.type === type).map((category) => <View key={category.id} style={styles.row}><Text style={styles.rowIcon}>{category.icon}</Text><View style={styles.rowCopy}><Text style={styles.rowName}>{category.name}</Text><Text style={styles.rowDetail}>{category.isDefault ? 'Built-in' : 'Custom'}</Text></View>{!category.isDefault ? <View style={styles.rowActions}><Pressable accessibilityLabel={`Edit ${category.name}`} onPress={() => { setEditing(category); setName(category.name); setIcon(category.icon); }}><Text style={styles.edit}>Edit</Text></Pressable><Pressable accessibilityLabel={`Delete ${category.name}`} onPress={() => remove(category)}><Text style={styles.delete}>Delete</Text></Pressable></View> : null}</View>)}
-  </ScrollView></Screen>;
+  </KeyboardAwareScrollView></Screen>;
 }
 
 const styles = StyleSheet.create({

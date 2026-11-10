@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useCallback, useMemo, useRef, useState, type ComponentRef, type RefObject } from 'react';
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ArrowLeft, ImagePlus, Trash2 } from 'lucide-react-native';
 import { Screen } from '../src/components/shared/Screen';
+import { KeyboardAwareScrollView } from '../src/components/shared/KeyboardAwareScrollView';
 import { SqliteSettingsRepository } from '../src/database/repositories/settings.repository';
 import { ProfileAvatar } from '../src/features/profile/components/profile-avatar';
 import { chooseProfileImage, deleteOwnedProfileImage, persistProfileImage } from '../src/features/profile/services/profile-image.service';
@@ -27,6 +28,8 @@ export default function ProfileScreen(): React.JSX.Element {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const roleInputRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const organizationInputRef = useRef<ComponentRef<typeof TextInput>>(null);
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
@@ -49,6 +52,7 @@ export default function ProfileScreen(): React.JSX.Element {
 
   const save = async (): Promise<void> => {
     if (saving) return;
+    Keyboard.dismiss();
     setSaving(true); setError(null);
     let persistedAvatar: string | null = null;
     try {
@@ -64,7 +68,7 @@ export default function ProfileScreen(): React.JSX.Element {
     } finally { setSaving(false); }
   };
 
-  return <Screen><KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+  return <Screen><KeyboardAwareScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
     <View style={styles.header}><Pressable accessibilityLabel="Go back" accessibilityRole="button" onPress={() => router.back()} style={styles.back}><ArrowLeft color={colors.text} size={22} /></Pressable><Text style={styles.title}>Edit profile</Text><View style={styles.headerSpacer} /></View>
     <Text style={styles.subtitle}>Make Intern Wallet feel like yours. Your profile stays on this device.</Text>
     {loading ? <ActivityIndicator color={colors.forest} style={styles.loading} /> : <>
@@ -73,23 +77,22 @@ export default function ProfileScreen(): React.JSX.Element {
         <View style={styles.photoActions}><Pressable accessibilityRole="button" onPress={() => { void changePhoto(); }} style={({ pressed }) => [styles.photoButton, pressed && styles.pressed]}><ImagePlus color={colors.forest} size={18} /><Text style={styles.photoButtonText}>{avatarUri ? 'Change photo' : 'Choose photo'}</Text></Pressable>{avatarUri ? <Pressable accessibilityRole="button" onPress={() => { setAvatarUri(null); setAvatarChanged(true); }} style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}><Trash2 color={colors.expense} size={16} /><Text style={styles.removeText}>Remove</Text></Pressable> : null}</View>
       </View>
       <View style={styles.form}>
-        <Field label="Display name" maxLength={40} onChangeText={setDisplayName} placeholder="For example, May" value={displayName} />
-        <Field label="Internship role" maxLength={60} onChangeText={setRole} optional placeholder="For example, UI/UX Design Intern" value={role} />
-        <Field label="Organization" maxLength={60} onChangeText={setOrganization} optional placeholder="Company or school" value={organization} />
+        <Field label="Display name" maxLength={40} onChangeText={setDisplayName} onSubmitEditing={() => roleInputRef.current?.focus()} placeholder="For example, May" value={displayName} />
+        <Field inputRef={roleInputRef} label="Internship role" maxLength={60} onChangeText={setRole} onSubmitEditing={() => organizationInputRef.current?.focus()} optional placeholder="For example, UI/UX Design Intern" value={role} />
+        <Field inputRef={organizationInputRef} label="Organization" maxLength={60} onChangeText={setOrganization} onSubmitEditing={Keyboard.dismiss} optional placeholder="Company or school" returnKeyType="done" value={organization} />
         <Text style={styles.help}>Your name appears in the Home greeting. Text details are included in JSON backups; the local photo is not.</Text>
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
         <Pressable accessibilityRole="button" disabled={saving} onPress={() => { void save(); }} style={[styles.save, saving && styles.disabled]}>{saving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveText}>Save profile</Text>}</Pressable>
       </View>
     </>}
-  </ScrollView></KeyboardAvoidingView></Screen>;
+  </KeyboardAwareScrollView></Screen>;
 }
 
-function Field({ label, maxLength, onChangeText, optional = false, placeholder, value }: { label: string; maxLength: number; onChangeText: (value: string) => void; optional?: boolean; placeholder: string; value: string }): React.JSX.Element {
-  return <View style={styles.field}><View style={styles.labelRow}><Text style={styles.label}>{label}</Text>{optional ? <Text style={styles.optional}>Optional</Text> : null}</View><TextInput accessibilityLabel={label} autoCapitalize="words" maxLength={maxLength} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={colors.textMuted} returnKeyType="next" style={styles.input} value={value} /></View>;
+function Field({ inputRef, label, maxLength, onChangeText, onSubmitEditing, optional = false, placeholder, returnKeyType = 'next', value }: { inputRef?: RefObject<ComponentRef<typeof TextInput> | null>; label: string; maxLength: number; onChangeText: (value: string) => void; onSubmitEditing: () => void; optional?: boolean; placeholder: string; returnKeyType?: 'done' | 'next'; value: string }): React.JSX.Element {
+  return <View style={styles.field}><View style={styles.labelRow}><Text style={styles.label}>{label}</Text>{optional ? <Text style={styles.optional}>Optional</Text> : null}</View><TextInput ref={inputRef} accessibilityLabel={label} autoCapitalize="words" blurOnSubmit={returnKeyType === 'done'} maxLength={maxLength} onChangeText={onChangeText} onSubmitEditing={onSubmitEditing} placeholder={placeholder} placeholderTextColor={colors.textMuted} returnKeyType={returnKeyType} style={styles.input} value={value} /></View>;
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
   header: { alignItems: 'center', flexDirection: 'row' },
   back: { alignItems: 'center', backgroundColor: colors.surface, borderRadius: 99, height: 44, justifyContent: 'center', width: 44 },
