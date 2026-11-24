@@ -1,6 +1,7 @@
 import { ArrowDownLeft, ArrowUpRight, ChevronRight } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { formatMMK } from '@/lib/currency';
+import { moneySourceLabel } from '@/lib/money-source';
 import { colors } from '@/theme/colors';
 import { radii, shadows, spacing } from '@/theme/spacing';
 import { fontFamily } from '@/theme/typography';
@@ -21,7 +22,7 @@ export function TransactionListItem({ transaction, category, onPress }: Transact
       </View>
       <View style={styles.main}>
         <Text numberOfLines={1} style={styles.category}>{category?.icon ?? '•'} {category?.name ?? 'Unknown category'}</Text>
-        <Text numberOfLines={1} style={styles.note}>{transaction.note || 'No note'}</Text>
+        <Text numberOfLines={1} style={styles.note}>{moneySourceLabel(transaction.sourceType, transaction.bankName)}{transaction.note ? ` · ${transaction.note}` : ''}</Text>
       </View>
       <View style={styles.amountWrap}>
         <Text style={[styles.amount, isIncome ? styles.incomeAmount : styles.expenseAmount]}>

@@ -1,5 +1,5 @@
 import { daysBetween, effectiveDaysForPeriod, formatMonth, monthPeriod, periodForMonth, type DatePeriod } from '@/lib/date';
-import type { AnalyticsRepository, CategorySpendingRow, DailySpendingRow, ExpenseTransactionRow, MonthlySpendingRow } from '@/database/repositories/analytics.repository';
+import type { AnalyticsRepository, CategorySpendingRow, DailySpendingRow, ExpenseTransactionRow, MonthlySpendingRow, MoneyFlowRow } from '@/database/repositories/analytics.repository';
 import type { BudgetRepository } from '@/database/repositories/budget.repository';
 import type { BudgetStatus } from '@/types/common';
 
@@ -24,6 +24,7 @@ export type ReportsData = {
   lowestSpendingCategory: ReportCategory | null;
   categories: readonly ReportCategory[];
   incomeSources: readonly ReportCategory[];
+  moneyFlows: readonly MoneyFlowRow[];
   dailySpending: readonly DailySpendingRow[];
   monthlySpending: readonly MonthlySpendingRow[];
   savingsRate: number | null;
@@ -45,10 +46,11 @@ export class ReportsService {
       throw new Error('The report start date must be before its end date.');
     }
     const previousPeriod = getPreviousPeriod(period);
-    const [totals, categories, incomeSources, dailySpending, monthlySpending, highestExpense, previousTotals, budgetRows] = await Promise.all([
+    const [totals, categories, incomeSources, moneyFlows, dailySpending, monthlySpending, highestExpense, previousTotals, budgetRows] = await Promise.all([
       this.analytics.getTotals(period.fromDate, period.toDate),
       this.analytics.getCategorySpending(period.fromDate, period.toDate),
       this.analytics.getIncomeSourceBreakdown(period.fromDate, period.toDate),
+      this.analytics.getMoneyFlows(period.fromDate, period.toDate),
       this.analytics.getDailySpending(period.fromDate, period.toDate),
       this.analytics.getMonthlySpending(period.fromDate, period.toDate),
       this.analytics.getHighestExpense(period.fromDate, period.toDate),
@@ -74,6 +76,7 @@ export class ReportsService {
       lowestSpendingCategory: reportCategories[reportCategories.length - 1] ?? null,
       categories: reportCategories,
       incomeSources: reportIncomeSources,
+      moneyFlows,
       dailySpending,
       monthlySpending: completeMonthlySpending,
       savingsRate,

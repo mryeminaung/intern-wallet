@@ -4,13 +4,11 @@ import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-} from '@expo-google-fonts/inter';
-import { NotoSansMyanmar_400Regular } from '@expo-google-fonts/noto-sans-myanmar';
+import { DMSans_400Regular } from '@expo-google-fonts/dm-sans/400Regular';
+import { DMSans_500Medium } from '@expo-google-fonts/dm-sans/500Medium';
+import { DMSans_600SemiBold } from '@expo-google-fonts/dm-sans/600SemiBold';
+import { DMSans_700Bold } from '@expo-google-fonts/dm-sans/700Bold';
+import { NotoSansMyanmar_400Regular } from '@expo-google-fonts/noto-sans-myanmar/400Regular';
 import { initializeDatabase } from '@/database/client';
 import { SqliteSettingsRepository } from '@/database/repositories/settings.repository';
 import { SqliteTransactionRepository } from '@/database/repositories/transaction.repository';
@@ -21,10 +19,10 @@ void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout(): React.JSX.Element | null {
   const [fontsLoaded, fontError] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+    DMSans_700Bold,
     NotoSansMyanmar_400Regular,
   });
 

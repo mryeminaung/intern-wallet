@@ -2,19 +2,20 @@ import { z } from 'zod';
 import type { WalletData } from '@/types/common';
 import { DataManagementRepository } from '@/database/repositories/data-management.repository';
 import { settingKeys } from '@/lib/constants';
+import { moneySourceLabel } from '@/lib/money-source';
 
 const isoDate = z.string().refine((value) => Number.isFinite(Date.parse(value)), 'Invalid date');
 const amount = z.number().int().positive().safe();
 const category = z.object({ id: z.string().min(1), name: z.string().min(1), icon: z.string().min(1), type: z.enum(['income', 'expense']), isDefault: z.boolean() }).strict();
-const transaction = z.object({ id: z.string().min(1), type: z.enum(['income', 'expense']), amount, categoryId: z.string().min(1), note: z.string().nullable(), date: isoDate, createdAt: isoDate, updatedAt: isoDate }).strict();
+const transactionV1 = z.object({ id: z.string().min(1), type: z.enum(['income', 'expense']), amount, categoryId: z.string().min(1), note: z.string().nullable(), date: isoDate, createdAt: isoDate, updatedAt: isoDate }).strict();
+const transactionV2 = transactionV1.extend({ sourceType: z.enum(['cash', 'bank']).nullable(), bankName: z.string().max(40).nullable() }).strict();
 const budget = z.object({ id: z.string().min(1), month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/), categoryId: z.string().nullable(), amount }).strict();
 const setting = z.object({ key: z.string().min(1), value: z.string() }).strict();
-const backupSchema = z.object({
-  format: z.literal('intern-wallet-backup'),
-  version: z.literal(1),
-  createdAt: isoDate,
-  data: z.object({ categories: z.array(category), transactions: z.array(transaction), budgets: z.array(budget), settings: z.array(setting) }).strict(),
-}).strict().superRefine(({ data }, context) => {
+const backupBase = { format: z.literal('intern-wallet-backup'), createdAt: isoDate };
+const backupSchema = z.discriminatedUnion('version', [
+  z.object({ ...backupBase, version: z.literal(1), data: z.object({ categories: z.array(category), transactions: z.array(transactionV1), budgets: z.array(budget), settings: z.array(setting) }).strict() }).strict(),
+  z.object({ ...backupBase, version: z.literal(2), data: z.object({ categories: z.array(category), transactions: z.array(transactionV2), budgets: z.array(budget), settings: z.array(setting) }).strict() }).strict(),
+]).superRefine(({ data }, context) => {
   const categoryById = new Map(data.categories.map((item) => [item.id, item]));
   for (const [name, rows] of [['categories', data.categories], ['transactions', data.transactions], ['budgets', data.budgets]] as const) {
     if (new Set(rows.map((row) => row.id)).size !== rows.length) context.addIssue({ code: 'custom', message: `Duplicate ${name} IDs` });
@@ -36,14 +37,14 @@ export class DataManagementService {
   public async exportCsv(): Promise<string> {
     const data = await this.repository.readAll();
     const categories = new Map(data.categories.map((item) => [item.id, item.name]));
-    const rows = data.transactions.map((item) => [item.date, item.type, categories.get(item.categoryId) ?? '', String(item.amount), item.note ?? '']);
-    return '\uFEFF' + ['Date,Type,Category,Amount (MMK),Note', ...rows.map((row) => row.map(csvCell).join(','))].join('\r\n');
+    const rows = data.transactions.map((item) => [item.date, item.type, categories.get(item.categoryId) ?? '', moneySourceLabel(item.sourceType, item.bankName), String(item.amount), item.note ?? '']);
+    return '\uFEFF' + ['Date,Type,Category,Cash or Bank,Amount (MMK),Note', ...rows.map((row) => row.map(csvCell).join(','))].join('\r\n');
   }
 
   public async createBackup(): Promise<string> {
     const data = await this.repository.readAll();
     const portableData = { ...data, settings: data.settings.filter((item) => item.key !== settingKeys.profileAvatarUri) };
-    return JSON.stringify({ format: 'intern-wallet-backup', version: 1, createdAt: new Date().toISOString(), data: portableData });
+    return JSON.stringify({ format: 'intern-wallet-backup', version: 2, createdAt: new Date().toISOString(), data: portableData });
   }
 
   public previewBackup(json: string): BackupPreview {
@@ -53,13 +54,21 @@ export class DataManagementService {
 
   public async restoreBackup(json: string): Promise<void> {
     const parsed = parseBackup(json);
-    await this.repository.replaceAll(parsed.data as WalletData);
+    await this.repository.replaceAll(parsed.data);
   }
 }
 
-function parseBackup(json: string): z.output<typeof backupSchema> {
+function parseBackup(json: string): { createdAt: string; data: WalletData } {
   if (json.length > 10_000_000) throw new Error('Backup is too large to restore.');
-  try { return backupSchema.parse(JSON.parse(json)); }
+  try {
+    const parsed = backupSchema.parse(JSON.parse(json));
+    if (parsed.version === 2) {
+      for (const item of parsed.data.transactions) {
+        if (item.sourceType === 'bank' ? !item.bankName?.trim() : item.bankName !== null) throw new Error('Invalid source');
+      }
+    }
+    return { createdAt: parsed.createdAt, data: { ...parsed.data, transactions: parsed.data.transactions.map((item) => ({ ...item, sourceType: 'sourceType' in item ? item.sourceType : null, bankName: 'bankName' in item ? item.bankName : null })) } };
+  }
   catch { throw new Error('Backup is invalid or from an incompatible version. Your current data was not changed.'); }
 }
 

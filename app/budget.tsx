@@ -135,7 +135,7 @@ export default function BudgetScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.xxl },
   header: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
   iconButton: { alignItems: 'center', height: 42, justifyContent: 'center', width: 42 },
   title: { color: colors.text, flex: 1, fontFamily: fontFamily.bold, fontSize: 26, textAlign: 'center' },

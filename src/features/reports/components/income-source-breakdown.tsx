@@ -10,7 +10,7 @@ export function IncomeSourceBreakdown({ sources, onPressSource }: {
   onPressSource: (categoryId: string) => void;
 }): React.JSX.Element {
   return <View style={styles.card}>
-    <Text style={styles.title}>Income sources</Text>
+    <Text style={styles.title}>Income categories</Text>
     {sources.length === 0 ? <Text style={styles.empty}>No income recorded in this period.</Text> : sources.map((source) =>
       <Pressable accessibilityRole="button" key={source.categoryId} onPress={() => onPressSource(source.categoryId)} style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
         <Text style={styles.icon}>{source.categoryIcon}</Text>

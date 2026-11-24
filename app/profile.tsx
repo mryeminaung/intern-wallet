@@ -98,7 +98,7 @@ function Field({ inputRef, label, maxLength, onChangeText, onSubmitEditing, opti
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.xxl },
   header: { alignItems: 'center', flexDirection: 'row' },
   back: { alignItems: 'center', backgroundColor: colors.surface, borderRadius: 99, height: 44, justifyContent: 'center', width: 44 },
   headerSpacer: { width: 44 },

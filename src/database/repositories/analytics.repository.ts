@@ -24,6 +24,13 @@ export type MonthlySpendingRow = {
   expenses: number;
 };
 
+export type MoneyFlowRow = {
+  sourceType: 'cash' | 'bank' | null;
+  bankName: string | null;
+  income: number;
+  expenses: number;
+};
+
 export type RecentTransactionRow = {
   id: string;
   type: TransactionType;
@@ -32,6 +39,8 @@ export type RecentTransactionRow = {
   categoryName: string;
   categoryIcon: string;
   note: string | null;
+  sourceType: 'cash' | 'bank' | null;
+  bankName: string | null;
   date: string;
   createdAt: string;
   updatedAt: string;
@@ -47,6 +56,7 @@ export interface AnalyticsRepository {
   getMonthlySpending(fromDate: string, toDate: string): Promise<readonly MonthlySpendingRow[]>;
   getHighestExpense(fromDate: string, toDate: string): Promise<ExpenseTransactionRow | null>;
   getRecentTransactions(limit: number): Promise<readonly RecentTransactionRow[]>;
+  getMoneyFlows(fromDate: string, toDate: string): Promise<readonly MoneyFlowRow[]>;
 }
 
 export class SqliteAnalyticsRepository implements AnalyticsRepository {
@@ -72,6 +82,18 @@ export class SqliteAnalyticsRepository implements AnalyticsRepository {
       ...parameters,
     );
     return { income: row?.income ?? 0, expenses: row?.expenses ?? 0 };
+  }
+
+  public async getMoneyFlows(fromDate: string, toDate: string): Promise<readonly MoneyFlowRow[]> {
+    return this.database.getAllAsync<MoneyFlowRow>(
+      `SELECT source_type AS sourceType, MIN(bank_name) AS bankName,
+              COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) AS income,
+              COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) AS expenses
+       FROM transactions WHERE date >= ? AND date <= ?
+       GROUP BY source_type, LOWER(bank_name)
+       ORDER BY income + expenses DESC, bank_name COLLATE NOCASE`,
+      fromDate, toDate,
+    );
   }
 
   public async getCategorySpending(fromDate: string, toDate: string): Promise<readonly CategorySpendingRow[]> {
@@ -131,7 +153,8 @@ export class SqliteAnalyticsRepository implements AnalyticsRepository {
   public async getHighestExpense(fromDate: string, toDate: string): Promise<ExpenseTransactionRow | null> {
     return this.database.getFirstAsync<ExpenseTransactionRow>(
       `SELECT t.id, t.type, t.amount, t.category_id AS categoryId,
-              c.name AS categoryName, c.icon AS categoryIcon, t.note, t.date,
+              c.name AS categoryName, c.icon AS categoryIcon, t.note,
+              t.source_type AS sourceType, t.bank_name AS bankName, t.date,
               t.created_at AS createdAt, t.updated_at AS updatedAt
        FROM transactions t
        INNER JOIN categories c ON c.id = t.category_id
@@ -146,7 +169,8 @@ export class SqliteAnalyticsRepository implements AnalyticsRepository {
   public async getRecentTransactions(limit: number): Promise<readonly RecentTransactionRow[]> {
     return this.database.getAllAsync<RecentTransactionRow>(
       `SELECT t.id, t.type, t.amount, t.category_id AS categoryId,
-              c.name AS categoryName, c.icon AS categoryIcon, t.note, t.date,
+              c.name AS categoryName, c.icon AS categoryIcon, t.note,
+              t.source_type AS sourceType, t.bank_name AS bankName, t.date,
               t.created_at AS createdAt, t.updated_at AS updatedAt
        FROM transactions t
        INNER JOIN categories c ON c.id = t.category_id

@@ -15,10 +15,12 @@ import {
 import { colors } from '@/theme/colors';
 import { fontFamily } from '@/theme/typography';
 import { radii, spacing } from '@/theme/spacing';
+import { useUiStore } from '@/stores/ui.store';
 
 export default function DataManagementScreen(): React.JSX.Element {
   const router = useRouter();
   const database = useSQLiteContext();
+  const showNotice = useUiStore((state) => state.showNotice);
   const service = useMemo(() => new DataManagementService(new DataManagementRepository(database)), [database]);
   const [selectedBackup, setSelectedBackup] = useState<{ name: string; content: string; preview: BackupPreview } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -63,7 +65,12 @@ export default function DataManagementScreen(): React.JSX.Element {
   const restore = async (json: string): Promise<void> => {
     if (busy) return;
     setBusy(true); setError(null); setMessage(null);
-    try { await service.restoreBackup(json); setSelectedBackup(null); setMessage('Backup restored. Reopen Home to see the restored figures.'); }
+    try {
+      await service.restoreBackup(json);
+      setSelectedBackup(null);
+      showNotice('Backup restored successfully');
+      router.replace('/');
+    }
     catch (cause) { setError(cause instanceof Error ? cause.message : 'Restore failed. Your current data was not changed.'); }
     finally { setBusy(false); }
   };
@@ -96,7 +103,7 @@ function Action({ label, disabled, onPress }: { label: string; disabled: boolean
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.xxl },
   header: { alignItems: 'center', flexDirection: 'row' },
   back: { alignItems: 'center', height: 42, justifyContent: 'center', width: 42 },
   title: { color: colors.text, fontFamily: fontFamily.bold, fontSize: 23, marginLeft: spacing.sm },

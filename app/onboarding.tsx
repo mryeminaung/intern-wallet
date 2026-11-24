@@ -145,7 +145,7 @@ function parsePositiveAmount(value: string): number | null {
 }
 
 const styles = StyleSheet.create({
-  content: { flexGrow: 1, padding: spacing.lg, paddingBottom: spacing.xxl },
+  content: { flexGrow: 1, paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.xxl },
   topBar: { alignItems: 'center', flexDirection: 'row', gap: spacing.md, justifyContent: 'space-between' },
   back: { alignItems: 'center', height: 42, justifyContent: 'center', width: 42 },
   progress: { backgroundColor: colors.border, borderRadius: 99, flex: 1, height: 5, overflow: 'hidden' },

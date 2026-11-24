@@ -31,9 +31,10 @@ export class DataManagementRepository {
       await seedDefaultCategories(this.database);
       for (const transaction of data.transactions) {
         await this.database.runAsync(
-          `INSERT INTO transactions (id, type, amount, category_id, note, date, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO transactions (id, type, amount, category_id, source_type, bank_name, note, date, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           transaction.id, transaction.type, transaction.amount, transaction.categoryId,
+          transaction.sourceType, transaction.bankName,
           transaction.note, transaction.date, transaction.createdAt, transaction.updatedAt,
         );
       }

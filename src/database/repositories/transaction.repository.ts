@@ -5,12 +5,14 @@ import type {
   CreateTransactionInput,
   Transaction,
   TransactionType,
+  MoneySourceType,
   UpdateTransactionInput,
 } from '@/types/common';
 
 export type TransactionFilter = {
   type?: TransactionType;
   categoryId?: string;
+  sourceKey?: string;
   fromDate?: string;
   toDate?: string;
   search?: string;
@@ -26,6 +28,8 @@ type TransactionRow = {
   type: TransactionType;
   amount: number;
   category_id: string;
+  source_type: MoneySourceType | null;
+  bank_name: string | null;
   note: string | null;
   date: string;
   created_at: string;
@@ -51,6 +55,8 @@ function mapTransaction(row: TransactionRow): Transaction {
     type: row.type,
     amount: row.amount,
     categoryId: row.category_id,
+    sourceType: row.source_type,
+    bankName: row.bank_name,
     note: row.note,
     date: row.date,
     createdAt: row.created_at,
@@ -58,8 +64,8 @@ function mapTransaction(row: TransactionRow): Transaction {
   };
 }
 
-const transactionColumns = 'id, type, amount, category_id, note, date, created_at, updated_at';
-const transactionColumnsWithAlias = 't.id, t.type, t.amount, t.category_id, t.note, t.date, t.created_at, t.updated_at';
+const transactionColumns = 'id, type, amount, category_id, source_type, bank_name, note, date, created_at, updated_at';
+const transactionColumnsWithAlias = 't.id, t.type, t.amount, t.category_id, t.source_type, t.bank_name, t.note, t.date, t.created_at, t.updated_at';
 
 export class SqliteTransactionRepository implements TransactionRepository {
   public constructor(private readonly database: SQLiteDatabase) {}
@@ -76,6 +82,12 @@ export class SqliteTransactionRepository implements TransactionRepository {
       conditions.push('t.category_id = ?');
       parameters.push(filters.categoryId);
     }
+    if (filters.sourceKey === 'cash') conditions.push("t.source_type = 'cash'");
+    else if (filters.sourceKey === 'unspecified') conditions.push('t.source_type IS NULL');
+    else if (filters.sourceKey?.startsWith('bank:')) {
+      conditions.push("t.source_type = 'bank' AND LOWER(t.bank_name) = LOWER(?)");
+      parameters.push(filters.sourceKey.slice(5));
+    }
     if (filters.fromDate) {
       conditions.push('t.date >= ?');
       parameters.push(filters.fromDate);
@@ -85,7 +97,7 @@ export class SqliteTransactionRepository implements TransactionRepository {
       parameters.push(filters.toDate);
     }
     if (filters.search?.trim()) {
-      conditions.push("LOWER(COALESCE(t.note, '') || ' ' || COALESCE(c.name, '')) LIKE LOWER(?)");
+      conditions.push("LOWER(COALESCE(t.note, '') || ' ' || COALESCE(c.name, '') || ' ' || COALESCE(t.bank_name, '')) LIKE LOWER(?)");
       parameters.push(`%${filters.search.trim()}%`);
     }
     if (filters.minAmount !== undefined) {
@@ -146,17 +158,26 @@ export class SqliteTransactionRepository implements TransactionRepository {
     return row?.count ?? 0;
   }
 
+  public async getBankNames(): Promise<readonly string[]> {
+    const rows = await this.database.getAllAsync<{ bank_name: string }>(
+      "SELECT MIN(bank_name) AS bank_name FROM transactions WHERE source_type = 'bank' AND bank_name IS NOT NULL GROUP BY LOWER(bank_name) ORDER BY bank_name COLLATE NOCASE",
+    );
+    return rows.map((row) => row.bank_name);
+  }
+
   public async create(input: CreateTransactionInput): Promise<Transaction> {
     const id = randomUUID();
     const now = toIsoDate();
     await this.database.runAsync(
       `INSERT INTO transactions
-        (id, type, amount, category_id, note, date, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, type, amount, category_id, source_type, bank_name, note, date, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       id,
       input.type,
       input.amount,
       input.categoryId,
+      input.sourceType ?? null,
+      input.sourceType === 'bank' ? input.bankName?.trim() ?? null : null,
       input.note ?? null,
       input.date,
       now,
@@ -173,11 +194,13 @@ export class SqliteTransactionRepository implements TransactionRepository {
   public async update(id: string, input: UpdateTransactionInput): Promise<Transaction | null> {
     const result = await this.database.runAsync(
       `UPDATE transactions
-       SET type = ?, amount = ?, category_id = ?, note = ?, date = ?, updated_at = ?
+       SET type = ?, amount = ?, category_id = ?, source_type = ?, bank_name = ?, note = ?, date = ?, updated_at = ?
        WHERE id = ?`,
       input.type,
       input.amount,
       input.categoryId,
+      input.sourceType ?? null,
+      input.sourceType === 'bank' ? input.bankName?.trim() ?? null : null,
       input.note ?? null,
       input.date,
       toIsoDate(),

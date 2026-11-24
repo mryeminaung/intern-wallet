@@ -2,13 +2,14 @@ import * as SQLite from 'expo-sqlite';
 import { DATABASE_NAME } from '@/lib/constants';
 import { initialMigration } from '@/database/migrations/001_initial';
 import { budgetScopeIndexesMigration } from '@/database/migrations/002_budget_scope_indexes';
+import { moneySourcesMigration } from '@/database/migrations/003_money_sources';
 import { seedDefaultCategories } from './seed';
 import { setDisplayDateFormat } from '@/lib/date';
 import { setCurrencyDisplay } from '@/lib/currency';
 import { settingKeys } from '@/lib/constants';
 import type { Migration } from './schema';
 
-const migrations: readonly Migration[] = [initialMigration, budgetScopeIndexesMigration];
+const migrations: readonly Migration[] = [initialMigration, budgetScopeIndexesMigration, moneySourcesMigration];
 
 export async function initializeDatabase(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync('PRAGMA foreign_keys = ON;');

@@ -66,7 +66,7 @@ export default function CategoriesScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.xxl },
   header: { alignItems: 'center', flexDirection: 'row' },
   back: { alignItems: 'center', height: 42, justifyContent: 'center', width: 42 },
   title: { color: colors.text, fontFamily: fontFamily.bold, fontSize: 23, marginLeft: spacing.sm },

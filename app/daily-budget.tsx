@@ -116,7 +116,7 @@ export default function DailyBudgetScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.xxl },
   header: { alignItems: 'center', flexDirection: 'row' },
   back: { alignItems: 'center', height: 42, justifyContent: 'center', width: 42 },
   headerSpacer: { width: 42 },

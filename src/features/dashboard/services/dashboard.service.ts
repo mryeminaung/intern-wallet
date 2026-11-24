@@ -32,7 +32,7 @@ export class DashboardService {
       this.analytics.getTotals(previous.fromDate, previous.toDate),
       this.analytics.getCategorySpending(current.fromDate, current.toDate),
       this.budgets.list(monthKey),
-      this.analytics.getRecentTransactions(5),
+      this.analytics.getRecentTransactions(3),
     ]);
     const overallBudget = budgets.find((budget) => budget.categoryId === null);
     const totalBudget = overallBudget?.amount ?? budgets.reduce((sum, budget) => sum + budget.amount, 0);

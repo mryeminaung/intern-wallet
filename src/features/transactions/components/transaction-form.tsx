@@ -20,6 +20,7 @@ import { formatDisplayDate } from '@/lib/date';
 import { colors } from '@/theme/colors';
 import { radii, spacing } from '@/theme/spacing';
 import { fontFamily } from '@/theme/typography';
+import { defaultBankNames } from '@/lib/money-source';
 import type { Category, TransactionType } from '@/types/common';
 import {
   transactionFormSchema,
@@ -29,6 +30,7 @@ import { CategorySelector } from './category-selector';
 
 type TransactionFormProps = {
   categories: readonly Category[];
+  bankNames?: readonly string[];
   initialValues?: Partial<TransactionFormValues>;
   submitLabel: string;
   submitting: boolean;
@@ -43,6 +45,8 @@ const defaultValues: TransactionFormValues = {
   type: 'expense',
   amount: '',
   categoryId: '',
+  sourceType: undefined,
+  bankName: '',
   date: new Date().toISOString(),
   note: '',
 };
@@ -51,6 +55,7 @@ const TRANSACTION_KEYBOARD_ACCESSORY_ID = 'transaction-form-keyboard';
 
 export function TransactionForm({
   categories,
+  bankNames = [],
   initialValues,
   submitLabel,
   submitting,
@@ -76,6 +81,9 @@ export function TransactionForm({
   const previousType = useRef(selectedType);
   const selectedCategoryId = watch('categoryId');
   const selectedDate = watch('date');
+  const selectedSourceType = watch('sourceType');
+  const selectedBankName = watch('bankName');
+  const availableBankNames = useMemo(() => [...new Set([...defaultBankNames, ...bankNames])], [bankNames]);
   const selectedCategory = useMemo(
     () => categories.find((category) => category.id === selectedCategoryId),
     [categories, selectedCategoryId],
@@ -157,6 +165,17 @@ export function TransactionForm({
         <CategorySelector categories={categories} onChange={(categoryId) => setValue('categoryId', categoryId, { shouldValidate: true })} recentCategoryIds={recentCategoryIds?.[selectedType]} type={selectedType} value={selectedCategoryId} />
         {errors.categoryId ? <Text style={styles.errorText}>{errors.categoryId.message}</Text> : null}
 
+        <Text style={styles.label}>{selectedType === 'income' ? 'Received in' : 'Paid from'}</Text>
+        <View style={styles.segmentedControl}>
+          {(['cash', 'bank'] as const).map((sourceType) => <Pressable accessibilityRole="button" key={sourceType} onPress={() => { setValue('sourceType', sourceType, { shouldValidate: true }); if (sourceType === 'cash') setValue('bankName', ''); }} style={[styles.segment, selectedSourceType === sourceType && styles.segmentSelected]}><Text style={[styles.segmentText, selectedSourceType === sourceType && styles.segmentTextSelected]}>{sourceType === 'cash' ? 'Cash' : 'Bank'}</Text></Pressable>)}
+        </View>
+        {errors.sourceType ? <Text style={styles.errorText}>{errors.sourceType.message}</Text> : null}
+        {selectedSourceType === 'bank' ? <>
+          <View style={styles.bankChips}>{availableBankNames.map((name) => <Pressable accessibilityRole="button" key={name} onPress={() => setValue('bankName', name, { shouldValidate: true })} style={[styles.bankChip, selectedBankName?.toLocaleLowerCase() === name.toLocaleLowerCase() && styles.bankChipSelected]}><Text style={[styles.bankChipText, selectedBankName?.toLocaleLowerCase() === name.toLocaleLowerCase() && styles.bankChipTextSelected]}>{name}</Text></Pressable>)}</View>
+          <Controller control={control} name="bankName" render={({ field }) => <TextInput accessibilityLabel="Bank name" editable={!submitting} onBlur={field.onBlur} onChangeText={field.onChange} placeholder="Or enter another bank" placeholderTextColor={colors.textMuted} style={styles.bankInput} value={field.value} />} />
+          {errors.bankName ? <Text style={styles.errorText}>{errors.bankName.message}</Text> : null}
+        </> : null}
+
         <Text style={styles.label}>Date</Text>
         <Controller
           control={control}
@@ -224,8 +243,8 @@ export function TransactionForm({
 const styles = StyleSheet.create({
   form: { flex: 1 },
   scroll: { flex: 1 },
-  content: { padding: spacing.lg, paddingBottom: spacing.md },
-  footer: { backgroundColor: colors.background, borderTopColor: colors.border, borderTopWidth: StyleSheet.hairlineWidth, paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.sm },
+  content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.md },
+  footer: { backgroundColor: colors.background, borderTopColor: colors.border, borderTopWidth: StyleSheet.hairlineWidth, paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.sm, paddingBottom: spacing.sm },
   label: { color: colors.text, fontFamily: fontFamily.medium, fontSize: 14, marginBottom: spacing.sm, marginTop: spacing.md },
   segmentedControl: { backgroundColor: colors.forestSoft, borderRadius: radii.md, flexDirection: 'row', padding: spacing.xs },
   segment: { alignItems: 'center', borderRadius: radii.sm, flex: 1, paddingVertical: spacing.md },
@@ -239,6 +258,12 @@ const styles = StyleSheet.create({
   selectText: { color: colors.text, flex: 1, fontFamily: fontFamily.medium, fontSize: 15 },
   textInput: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.md, borderWidth: 1, color: colors.text, fontFamily: fontFamily.regular, fontSize: 15, padding: spacing.md },
   noteInput: { minHeight: 96, textAlignVertical: 'top' },
+  bankChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
+  bankChip: { borderColor: colors.border, borderRadius: 99, borderWidth: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  bankChipSelected: { backgroundColor: colors.forest, borderColor: colors.forest },
+  bankChipText: { color: colors.textMuted, fontFamily: fontFamily.medium, fontSize: 13 },
+  bankChipTextSelected: { color: colors.white },
+  bankInput: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.md, borderWidth: 1, color: colors.text, fontFamily: fontFamily.medium, fontSize: 15, marginTop: spacing.sm, padding: spacing.md },
   errorText: { color: colors.expense, fontFamily: fontFamily.regular, fontSize: 13, marginTop: spacing.xs },
   formError: { backgroundColor: '#FCEDEA', borderRadius: radii.sm, padding: spacing.sm },
   submitButton: { alignItems: 'center', backgroundColor: colors.forest, borderRadius: radii.md, minHeight: 54, justifyContent: 'center' },

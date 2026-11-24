@@ -16,7 +16,7 @@ export default function PlanScreen(): React.JSX.Element {
   const suggested = data ? getDailyOutlook(data.remainingToday, data.suggestedSafeDailySpending) : null;
 
   return <Screen><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-    <View style={styles.header}><View><Text style={styles.eyebrow}>YOUR MONEY PLAN</Text><Text style={styles.title}>Plan</Text></View><Pressable accessibilityLabel="Open settings" accessibilityRole="button" onPress={() => router.push('/settings')} style={({ pressed }) => [styles.settings, pressed && styles.pressed]}><Settings color={colors.forest} size={21} /></Pressable></View>
+    <View style={styles.header}><View><Text style={styles.title}>Plan</Text></View><Pressable accessibilityLabel="Open settings" accessibilityRole="button" onPress={() => router.push('/settings')} style={({ pressed }) => [styles.settings, pressed && styles.pressed]}><Settings color={colors.forest} size={21} /></Pressable></View>
     <Text style={styles.subtitle}>Set limits now so everyday spending stays predictable.</Text>
 
     {loading ? <Text style={styles.status}>Loading your plan…</Text> : null}
@@ -40,7 +40,7 @@ function PlanLink({ icon: Icon, label, description, onPress }: { icon: typeof Ta
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl + spacing.lg },
+  content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.tabBarClearance },
   header: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.sm },
   eyebrow: { color: colors.income, fontFamily: fontFamily.semiBold, fontSize: 11, letterSpacing: 1.3 },
   title: { color: colors.text, fontFamily: fontFamily.bold, fontSize: 30, marginTop: spacing.xs },

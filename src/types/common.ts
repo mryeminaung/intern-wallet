@@ -1,6 +1,7 @@
 export const transactionTypes = ['income', 'expense'] as const;
 
 export type TransactionType = (typeof transactionTypes)[number];
+export type MoneySourceType = 'cash' | 'bank';
 
 export type Category = {
   id: string;
@@ -15,6 +16,8 @@ export type Transaction = {
   type: TransactionType;
   amount: number;
   categoryId: string;
+  sourceType: MoneySourceType | null;
+  bankName: string | null;
   note: string | null;
   date: string;
   createdAt: string;
@@ -44,6 +47,8 @@ export type CreateTransactionInput = {
   type: TransactionType;
   amount: number;
   categoryId: string;
+  sourceType?: MoneySourceType | null;
+  bankName?: string | null;
   note?: string | null;
   date: string;
 };

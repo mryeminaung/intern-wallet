@@ -11,6 +11,7 @@ import {
   TransactionService,
   transactionToRepeatFormValues,
   useTransactionEntryCategories,
+  useBankNames,
 } from '@/features/transactions';
 
 import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
@@ -26,6 +27,7 @@ export default function NewTransactionScreen(): React.JSX.Element {
   const params = useLocalSearchParams<{ type?: string | string[]; repeatId?: string | string[] }>();
   const database = useSQLiteContext();
   const { categories, recentCategoryIds, preferredCategoryIds, loading, error: categoryError } = useTransactionEntryCategories();
+  const bankNames = useBankNames();
   const showNotice = useUiStore((state) => state.showNotice);
   const repeatId = paramValue(params.repeatId);
   const requestedType: TransactionType = paramValue(params.type) === 'income' ? 'income' : 'expense';
@@ -98,19 +100,19 @@ export default function NewTransactionScreen(): React.JSX.Element {
       {categoryError ? <Text style={styles.error}>{categoryError}</Text> : null}
       {repeatError ? <Text style={styles.error}>{repeatError}</Text> : null}
       {repeatCategoryMissing ? <Text style={styles.warning}>The original category is no longer available. Choose another category before saving.</Text> : null}
-      {!loading && !repeatLoading && !repeatError && !categoryError ? <TransactionForm autoFocusAmount={!repeatTransaction} categories={categories} error={error} initialValues={initialValues} onSubmit={handleSubmit} preferredCategoryIds={preferredCategoryIds} recentCategoryIds={recentCategoryIds} submitLabel={repeatTransaction ? 'Save repeated transaction' : 'Save transaction'} submitting={submitting} /> : null}
+      {!loading && !repeatLoading && !repeatError && !categoryError ? <TransactionForm autoFocusAmount={!repeatTransaction} bankNames={bankNames} categories={categories} error={error} initialValues={initialValues} onSubmit={handleSubmit} preferredCategoryIds={preferredCategoryIds} recentCategoryIds={recentCategoryIds} submitLabel={repeatTransaction ? 'Save repeated transaction' : 'Save transaction'} submitting={submitting} /> : null}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', flexDirection: 'row', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
+  header: { alignItems: 'center', flexDirection: 'row', paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.sm },
   backButton: { alignItems: 'center', height: 40, justifyContent: 'center', width: 40 },
   headerSpacer: { width: 40 },
   title: { color: colors.text, flex: 1, fontFamily: fontFamily.bold, fontSize: 20, textAlign: 'center' },
-  status: { color: colors.textMuted, fontFamily: fontFamily.regular, paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  error: { color: colors.expense, fontFamily: fontFamily.regular, padding: spacing.lg },
-  warning: { backgroundColor: '#FFF7E6', color: colors.warning, fontFamily: fontFamily.medium, marginHorizontal: spacing.lg, marginTop: spacing.md, padding: spacing.sm },
+  status: { color: colors.textMuted, fontFamily: fontFamily.regular, paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop },
+  error: { color: colors.expense, fontFamily: fontFamily.regular, paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop },
+  warning: { backgroundColor: '#FFF7E6', color: colors.warning, fontFamily: fontFamily.medium, marginHorizontal: spacing.screenHorizontal, marginTop: spacing.md, padding: spacing.sm },
 });
 
 function paramValue(value: string | string[] | undefined): string | undefined {

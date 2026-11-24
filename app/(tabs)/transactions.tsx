@@ -11,6 +11,7 @@ import {
   useTransactionCategories,
   useTransactions,
   useTransactionSummary,
+  useBankNames,
 } from '@/features/transactions';
 
 import { endOfDayIso, formatDisplayDate, formatMonth, periodForMonth, startOfDayIso } from '@/lib/date';
@@ -20,14 +21,17 @@ import { colors } from '@/theme/colors';
 import { fontFamily } from '@/theme/typography';
 import { radii, shadows, spacing } from '@/theme/spacing';
 import type { TransactionSort } from '@/database/repositories/transaction.repository';
+import { defaultBankNames } from '@/lib/money-source';
 
 type FilterDate = 'from' | 'to' | null;
 const FILTER_KEYBOARD_ACCESSORY_ID = 'transaction-filter-keyboard';
 
 export default function TransactionsScreen(): React.JSX.Element {
   const router = useRouter();
-  const { type, categoryId, setType, setCategoryId, reset } = useTransactionFilterStore();
+  const { type, categoryId, sourceKey, setType, setCategoryId, setSourceKey, reset } = useTransactionFilterStore();
   const { categories } = useTransactionCategories();
+  const bankNames = useBankNames();
+  const availableBankNames = useMemo(() => [...new Set([...defaultBankNames, ...bankNames])], [bankNames]);
   const [month, setMonth] = useState(formatMonth());
   const [search, setSearch] = useState('');
   const [fromDate, setFromDate] = useState<Date | null>(null);
@@ -36,6 +40,13 @@ export default function TransactionsScreen(): React.JSX.Element {
   const [minAmount, setMinAmount] = useState('');
   const [maxAmount, setMaxAmount] = useState('');
   const [sort, setSort] = useState<TransactionSort>('newest');
+  const [draftCategoryId, setDraftCategoryId] = useState<string | null>(null);
+  const [draftSourceKey, setDraftSourceKey] = useState<string | null>(null);
+  const [draftFromDate, setDraftFromDate] = useState<Date | null>(null);
+  const [draftToDate, setDraftToDate] = useState<Date | null>(null);
+  const [draftMinAmount, setDraftMinAmount] = useState('');
+  const [draftMaxAmount, setDraftMaxAmount] = useState('');
+  const [draftSort, setDraftSort] = useState<TransactionSort>('newest');
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const period = useMemo(() => periodForMonth(month), [month]);
@@ -44,19 +55,34 @@ export default function TransactionsScreen(): React.JSX.Element {
   const filters = useMemo(() => ({
     type: type === 'all' ? undefined : type,
     categoryId: categoryId ?? undefined,
+    sourceKey: sourceKey ?? undefined,
     fromDate: fromDate ? startOfDayIso(fromDate) : period.fromDate,
     toDate: toDate ? endOfDayIso(toDate) : period.toDate,
     search,
     minAmount: minAmountValue,
     maxAmount: maxAmountValue,
     sort,
-  }), [categoryId, fromDate, maxAmountValue, minAmountValue, period.fromDate, period.toDate, search, sort, toDate, type]);
+  }), [categoryId, sourceKey, fromDate, maxAmountValue, minAmountValue, period.fromDate, period.toDate, search, sort, toDate, type]);
   const { transactions, loading, error, refresh } = useTransactions(filters);
   const { summary, loading: summaryLoading, error: summaryError } = useTransactionSummary(period.fromDate, period.toDate);
   const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
   const currentMonth = formatMonth();
-  const hasAdvancedFilters = Boolean(categoryId || fromDate || toDate || minAmountValue !== undefined || maxAmountValue !== undefined || sort !== 'newest');
+  const hasAdvancedFilters = Boolean(categoryId || sourceKey || fromDate || toDate || minAmountValue !== undefined || maxAmountValue !== undefined || sort !== 'newest');
   const hasFilters = Boolean(search || hasAdvancedFilters || type !== 'all');
+  const filteredTotals = useMemo(() => transactions.reduce((totals, transaction) => {
+    if (transaction.type === 'income') totals.income += transaction.amount;
+    else totals.expenses += transaction.amount;
+    return totals;
+  }, { income: 0, expenses: 0 }), [transactions]);
+  const displayedTotals = hasFilters ? filteredTotals : summary;
+  const invalidDateRange = Boolean(draftFromDate && draftToDate && startOfDayIso(draftFromDate) > startOfDayIso(draftToDate));
+  const draftMinValue = parseAmount(draftMinAmount);
+  const draftMaxValue = parseAmount(draftMaxAmount);
+  const invalidAmountRange = Boolean(
+    (draftMinAmount.trim() && draftMinValue === undefined)
+    || (draftMaxAmount.trim() && draftMaxValue === undefined)
+    || (draftMinValue !== undefined && draftMaxValue !== undefined && draftMinValue > draftMaxValue),
+  );
 
   useFocusEffect(useCallback(() => { void refresh(); }, [refresh]));
 
@@ -74,7 +100,46 @@ export default function TransactionsScreen(): React.JSX.Element {
     const activeFilter = filterDate;
     setFilterDate(null);
     if (!activeFilter) return;
-    if (activeFilter === 'from') setFromDate(date); else setToDate(date);
+    if (activeFilter === 'from') setDraftFromDate(date); else setDraftToDate(date);
+  };
+
+  const openAdvanced = (): void => {
+    setDraftCategoryId(categoryId);
+    setDraftSourceKey(sourceKey);
+    setDraftFromDate(fromDate);
+    setDraftToDate(toDate);
+    setDraftMinAmount(minAmount);
+    setDraftMaxAmount(maxAmount);
+    setDraftSort(sort);
+    setAdvancedOpen(true);
+  };
+
+  const closeAdvanced = (): void => {
+    Keyboard.dismiss();
+    setFilterDate(null);
+    setAdvancedOpen(false);
+  };
+
+  const applyAdvanced = (): void => {
+    if (invalidDateRange || invalidAmountRange) return;
+    setCategoryId(draftCategoryId);
+    setSourceKey(draftSourceKey);
+    setFromDate(draftFromDate);
+    setToDate(draftToDate);
+    setMinAmount(draftMinAmount);
+    setMaxAmount(draftMaxAmount);
+    setSort(draftSort);
+    closeAdvanced();
+  };
+
+  const resetAdvancedDraft = (): void => {
+    setDraftCategoryId(null);
+    setDraftSourceKey(null);
+    setDraftFromDate(null);
+    setDraftToDate(null);
+    setDraftMinAmount('');
+    setDraftMaxAmount('');
+    setDraftSort('newest');
   };
 
   const clearFilters = (): void => {
@@ -85,26 +150,27 @@ export default function TransactionsScreen(): React.JSX.Element {
     setMinAmount('');
     setMaxAmount('');
     setSort('newest');
+    resetAdvancedDraft();
   };
 
   return <Screen>
     <ScrollView contentContainerStyle={styles.content} keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
       <View style={styles.headerRow}>
-        <View style={styles.headerCopy}><Text style={styles.eyebrow}>MONEY LOG</Text><Text style={styles.title}>Activity</Text><Text style={styles.subtitle}>Every income and expense, in one place.</Text></View>
+        <View style={styles.headerCopy}><Text style={styles.title}>Activity</Text><Text style={styles.subtitle}>Every income and expense, in one place.</Text></View>
         <Pressable accessibilityLabel="Add transaction" accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}><Plus color={colors.white} size={22} /></Pressable>
       </View>
 
       <View style={styles.monthSelector}><Pressable accessibilityLabel="Previous month" onPress={() => changeMonth(-1)} style={styles.monthButton}><ChevronLeft color={colors.forest} size={21} /></Pressable><Text style={styles.monthLabel}>{period.label}</Text><Pressable accessibilityLabel="Next month" disabled={month >= currentMonth} onPress={() => changeMonth(1)} style={[styles.monthButton, month >= currentMonth && styles.disabled]}><ChevronRight color={month >= currentMonth ? colors.border : colors.forest} size={21} /></Pressable></View>
 
       <View style={styles.summaryRow}>
-        <SummaryCard icon={ArrowUpRight} label="Income" value={summary?.income ?? 0} color={colors.income} background="#E5F4EB" />
-        <SummaryCard icon={ArrowDownLeft} label="Expenses" value={summary?.expenses ?? 0} color={colors.expense} background="#FDECEC" />
+        <SummaryCard icon={ArrowUpRight} label={hasFilters ? 'Filtered income' : 'Income'} value={displayedTotals?.income ?? 0} color={colors.income} background="#E5F4EB" />
+        <SummaryCard icon={ArrowDownLeft} label={hasFilters ? 'Filtered expenses' : 'Expenses'} value={displayedTotals?.expenses ?? 0} color={colors.expense} background="#FDECEC" />
       </View>
-      {summaryLoading ? <ActivityIndicator color={colors.forest} size="small" style={styles.summaryLoading} /> : null}
-      {summaryError ? <Text style={styles.summaryError}>{summaryError}</Text> : null}
+      {!hasFilters && summaryLoading ? <ActivityIndicator color={colors.forest} size="small" style={styles.summaryLoading} /> : null}
+      {!hasFilters && summaryError ? <Text style={styles.summaryError}>{summaryError}</Text> : null}
 
       <View style={styles.filterHeading}><Text style={styles.sectionTitle}>Transactions</Text>{hasFilters ? <Pressable accessibilityRole="button" onPress={clearFilters}><Text style={styles.clearText}>Clear all</Text></Pressable> : null}</View>
-      <TransactionFilter advancedActive={hasAdvancedFilters} onAdvancedPress={() => setAdvancedOpen(true)} onSearchChange={setSearch} onTypeChange={setType} search={search} type={type} />
+      <TransactionFilter advancedActive={hasAdvancedFilters} onAdvancedPress={openAdvanced} onSearchChange={setSearch} onTypeChange={setType} search={search} type={type} />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {loading ? <View style={styles.loading}><ActivityIndicator color={colors.forest} /><Text style={styles.status}>Loading transactions…</Text></View> : null}
@@ -112,29 +178,36 @@ export default function TransactionsScreen(): React.JSX.Element {
       <TransactionList categories={categoryById} onTransactionPress={(id) => router.push(`/transactions/${id}`)} transactions={transactions} />
     </ScrollView>
 
-    <Modal animationType="slide" onRequestClose={() => setAdvancedOpen(false)} transparent visible={advancedOpen}>
+    <Modal animationType="slide" onRequestClose={closeAdvanced} transparent visible={advancedOpen}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalOverlay}>
         <View style={styles.sheet}>
-          <View style={styles.sheetHeader}><View><Text style={styles.sheetTitle}>More filters</Text><Text style={styles.sheetSubtitle}>Narrow down this month’s activity.</Text></View><Pressable accessibilityLabel="Close filters" onPress={() => { Keyboard.dismiss(); setAdvancedOpen(false); }} style={styles.closeButton}><X color={colors.textMuted} size={20} /></Pressable></View>
+          <View style={styles.sheetHeader}><View><Text style={styles.sheetTitle}>More filters</Text><Text style={styles.sheetSubtitle}>Choose filters, then apply them.</Text></View><Pressable accessibilityLabel="Close filters without applying" onPress={closeAdvanced} style={styles.closeButton}><X color={colors.textMuted} size={20} /></Pressable></View>
           <ScrollView contentContainerStyle={styles.sheetContent} keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Text style={styles.fieldLabel}>Category</Text>
-            <ScrollView contentContainerStyle={styles.chipRow} horizontal showsHorizontalScrollIndicator={false}><Pressable onPress={() => setCategoryId(null)} style={[styles.sheetChip, !categoryId && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, !categoryId && styles.sheetChipTextSelected]}>All categories</Text></Pressable>{categories.map((category) => <Pressable key={category.id} onPress={() => setCategoryId(category.id)} style={[styles.sheetChip, categoryId === category.id && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, categoryId === category.id && styles.sheetChipTextSelected]}>{category.icon} {category.name}</Text></Pressable>)}</ScrollView>
+            <ScrollView contentContainerStyle={styles.chipRow} horizontal showsHorizontalScrollIndicator={false}><Pressable onPress={() => setDraftCategoryId(null)} style={[styles.sheetChip, !draftCategoryId && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, !draftCategoryId && styles.sheetChipTextSelected]}>All categories</Text></Pressable>{categories.map((category) => <Pressable key={category.id} onPress={() => setDraftCategoryId(category.id)} style={[styles.sheetChip, draftCategoryId === category.id && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, draftCategoryId === category.id && styles.sheetChipTextSelected]}>{category.icon} {category.name}</Text></Pressable>)}</ScrollView>
+
+            <Text style={styles.fieldLabel}>Cash or bank</Text>
+            <ScrollView contentContainerStyle={styles.chipRow} horizontal showsHorizontalScrollIndicator={false}>
+              {[[null, 'All'], ['cash', 'Cash'], ...availableBankNames.map((name) => [`bank:${name}`, name]), ['unspecified', 'Unspecified']].map(([key, label]) => <Pressable accessibilityRole="button" key={key ?? 'all'} onPress={() => setDraftSourceKey(key)} style={[styles.sheetChip, draftSourceKey === key && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, draftSourceKey === key && styles.sheetChipTextSelected]}>{label}</Text></Pressable>)}
+            </ScrollView>
 
             <Text style={styles.fieldLabel}>Date range</Text>
-            <View style={styles.dateRow}><Pressable onPress={() => { Keyboard.dismiss(); setFilterDate('from'); }} style={styles.dateButton}><CalendarDays color={colors.forest} size={16} /><Text style={styles.dateButtonText}>{fromDate ? formatDisplayDate(fromDate.toISOString()) : 'Start date'}</Text></Pressable><Pressable onPress={() => { Keyboard.dismiss(); setFilterDate('to'); }} style={styles.dateButton}><CalendarDays color={colors.forest} size={16} /><Text style={styles.dateButtonText}>{toDate ? formatDisplayDate(toDate.toISOString()) : 'End date'}</Text></Pressable></View>
+            <View style={styles.dateRow}><Pressable onPress={() => { Keyboard.dismiss(); setFilterDate('from'); }} style={styles.dateButton}><CalendarDays color={colors.forest} size={16} /><Text style={styles.dateButtonText}>{draftFromDate ? formatDisplayDate(draftFromDate.toISOString()) : 'Start date'}</Text></Pressable><Pressable onPress={() => { Keyboard.dismiss(); setFilterDate('to'); }} style={styles.dateButton}><CalendarDays color={colors.forest} size={16} /><Text style={styles.dateButtonText}>{draftToDate ? formatDisplayDate(draftToDate.toISOString()) : 'End date'}</Text></Pressable></View>
+            {invalidDateRange ? <Text style={styles.dateError}>End date must be on or after start date.</Text> : null}
 
             <Text style={styles.fieldLabel}>Amount range · MMK</Text>
-            <View style={styles.amountRow}><TextInput accessibilityLabel="Minimum amount" inputAccessoryViewID={FILTER_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={setMinAmount} placeholder="Minimum" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={minAmount} /><Text style={styles.amountDash}>—</Text><TextInput accessibilityLabel="Maximum amount" inputAccessoryViewID={FILTER_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={setMaxAmount} placeholder="Maximum" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={maxAmount} /></View>
+            <View style={styles.amountRow}><TextInput accessibilityLabel="Minimum amount" inputAccessoryViewID={FILTER_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={setDraftMinAmount} placeholder="Minimum" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={draftMinAmount} /><Text style={styles.amountDash}>—</Text><TextInput accessibilityLabel="Maximum amount" inputAccessoryViewID={FILTER_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={setDraftMaxAmount} placeholder="Maximum" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={draftMaxAmount} /></View>
+            {invalidAmountRange ? <Text style={styles.dateError}>Enter whole-number amounts; minimum must not exceed maximum.</Text> : null}
 
             <Text style={styles.fieldLabel}>Sort by</Text>
-            <View style={styles.sortRow}>{([['newest', 'Newest'], ['oldest', 'Oldest'], ['highest', 'Highest amount'], ['lowest', 'Lowest amount']] as const).map(([value, label]) => <Pressable key={value} onPress={() => setSort(value)} style={[styles.sortChip, sort === value && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, sort === value && styles.sheetChipTextSelected]}>{label}</Text></Pressable>)}</View>
-            <Pressable accessibilityRole="button" onPress={() => { Keyboard.dismiss(); setAdvancedOpen(false); }} style={styles.applyButton}><Text style={styles.applyButtonText}>Done</Text></Pressable>
+            <View style={styles.sortRow}>{([['newest', 'Newest'], ['oldest', 'Oldest'], ['highest', 'Highest amount'], ['lowest', 'Lowest amount']] as const).map(([value, label]) => <Pressable key={value} onPress={() => setDraftSort(value)} style={[styles.sortChip, draftSort === value && styles.sheetChipSelected]}><Text style={[styles.sheetChipText, draftSort === value && styles.sheetChipTextSelected]}>{label}</Text></Pressable>)}</View>
             <KeyboardDoneAccessory nativeID={FILTER_KEYBOARD_ACCESSORY_ID} />
           </ScrollView>
+          <View style={styles.sheetFooter}><Pressable accessibilityRole="button" onPress={resetAdvancedDraft} style={styles.resetButton}><Text style={styles.resetButtonText}>Reset</Text></Pressable><Pressable accessibilityRole="button" disabled={invalidDateRange || invalidAmountRange} onPress={applyAdvanced} style={[styles.applyButton, (invalidDateRange || invalidAmountRange) && styles.applyButtonDisabled]}><Text style={styles.applyButtonText}>Apply filters</Text></Pressable></View>
         </View>
       </KeyboardAvoidingView>
     </Modal>
-    {filterDate ? <DateTimePicker mode="date" onDismiss={() => setFilterDate(null)} onValueChange={(_event, date) => handleFilterDateChange(date)} value={(filterDate === 'from' ? fromDate : toDate) ?? new Date()} /> : null}
+    {filterDate ? <DateTimePicker mode="date" onDismiss={() => setFilterDate(null)} onValueChange={(_event, date) => handleFilterDateChange(date)} value={(filterDate === 'from' ? draftFromDate : draftToDate) ?? new Date()} /> : null}
   </Screen>;
 }
 
@@ -149,7 +222,7 @@ function parseAmount(value: string): number | undefined {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.tabBarClearance },
   headerRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
   headerCopy: { flex: 1 },
   eyebrow: { color: colors.income, fontFamily: fontFamily.semiBold, fontSize: 11, letterSpacing: 1.3 },
@@ -186,7 +259,7 @@ const styles = StyleSheet.create({
   sheetTitle: { color: colors.text, fontFamily: fontFamily.bold, fontSize: 21 },
   sheetSubtitle: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 12, marginTop: spacing.xs },
   closeButton: { alignItems: 'center', backgroundColor: colors.surface, borderRadius: 99, height: 36, justifyContent: 'center', width: 36 },
-  sheetContent: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  sheetContent: { paddingHorizontal: spacing.screenHorizontal, paddingBottom: spacing.md },
   fieldLabel: { color: colors.text, fontFamily: fontFamily.semiBold, fontSize: 13, marginBottom: spacing.sm, marginTop: spacing.lg },
   chipRow: { gap: spacing.sm },
   sheetChip: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 99, borderWidth: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
@@ -196,11 +269,16 @@ const styles = StyleSheet.create({
   dateRow: { flexDirection: 'row', gap: spacing.sm },
   dateButton: { alignItems: 'center', backgroundColor: colors.surface, borderRadius: radii.sm, flex: 1, flexDirection: 'row', gap: spacing.xs, minHeight: 48, paddingHorizontal: spacing.sm },
   dateButtonText: { color: colors.text, flex: 1, fontFamily: fontFamily.medium, fontSize: 12 },
+  dateError: { color: colors.expense, fontFamily: fontFamily.regular, fontSize: 12, marginTop: spacing.xs },
   amountRow: { alignItems: 'center', flexDirection: 'row', gap: spacing.sm },
   amountInput: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.sm, borderWidth: 1, color: colors.text, flex: 1, fontFamily: fontFamily.regular, fontSize: 14, minHeight: 48, paddingHorizontal: spacing.md },
   amountDash: { color: colors.textMuted, fontFamily: fontFamily.medium },
   sortRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   sortChip: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 99, borderWidth: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
-  applyButton: { alignItems: 'center', backgroundColor: colors.forest, borderRadius: radii.md, justifyContent: 'center', marginTop: spacing.xl, minHeight: 52 },
+  sheetFooter: { alignItems: 'center', backgroundColor: colors.background, borderTopColor: colors.border, borderTopWidth: StyleSheet.hairlineWidth, flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.sm, paddingBottom: spacing.md },
+  resetButton: { alignItems: 'center', borderColor: colors.border, borderRadius: radii.md, borderWidth: 1, justifyContent: 'center', minHeight: 50, paddingHorizontal: spacing.lg },
+  resetButtonText: { color: colors.forest, fontFamily: fontFamily.semiBold, fontSize: 14 },
+  applyButton: { alignItems: 'center', backgroundColor: colors.forest, borderRadius: radii.md, flex: 1, justifyContent: 'center', minHeight: 50 },
+  applyButtonDisabled: { opacity: 0.5 },
   applyButtonText: { color: colors.white, fontFamily: fontFamily.semiBold, fontSize: 15 },
 });

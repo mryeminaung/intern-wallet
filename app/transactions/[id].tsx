@@ -10,6 +10,7 @@ import { SqliteTransactionRepository } from '@/database/repositories/transaction
 import { TransactionService } from '@/features/transactions';
 import { formatMMK } from '@/lib/currency';
 import { formatDisplayDate } from '@/lib/date';
+import { moneySourceLabel } from '@/lib/money-source';
 import { colors } from '@/theme/colors';
 import { radii, spacing } from '@/theme/spacing';
 import { fontFamily } from '@/theme/typography';
@@ -113,6 +114,7 @@ export default function TransactionDetailsScreen(): React.JSX.Element {
               </Text>
             </View>
             <View style={styles.detailRow}><Tag color={colors.forest} size={19} /><Text style={styles.detailLabel}>Category</Text><Text style={styles.detailValue}>{category?.icon ?? '•'} {category?.name ?? 'Unknown'}</Text></View>
+            <View style={styles.detailRow}><Tag color={colors.forest} size={19} /><Text style={styles.detailLabel}>{transaction.type === 'income' ? 'Received in' : 'Paid from'}</Text><Text style={styles.detailValue}>{moneySourceLabel(transaction.sourceType, transaction.bankName)}</Text></View>
             <View style={styles.detailRow}><CalendarDays color={colors.forest} size={19} /><Text style={styles.detailLabel}>Date</Text><Text style={styles.detailValue}>{formatDisplayDate(transaction.date)}</Text></View>
             <View style={styles.noteBox}><Text style={styles.noteLabel}>Note</Text><Text style={styles.note}>{transaction.note || 'No note added.'}</Text></View>
           </Surface>
@@ -125,12 +127,12 @@ export default function TransactionDetailsScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', flexDirection: 'row', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
+  header: { alignItems: 'center', flexDirection: 'row', paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.sm },
   iconButton: { alignItems: 'center', height: 40, justifyContent: 'center', width: 40 },
   headerTitle: { color: colors.text, flex: 1, fontFamily: fontFamily.bold, fontSize: 19, textAlign: 'center' },
   headerActions: { flexDirection: 'row' },
-  content: { padding: spacing.lg },
-  status: { color: colors.textMuted, padding: spacing.lg },
+  content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop },
+  status: { color: colors.textMuted, paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop },
   error: { backgroundColor: '#FCEDEA', borderRadius: radii.sm, color: colors.expense, margin: spacing.lg, padding: spacing.sm },
   typeRow: { alignItems: 'center', borderBottomColor: colors.border, borderBottomWidth: StyleSheet.hairlineWidth, justifyContent: 'space-between', paddingBottom: spacing.lg },
   typeBadge: { borderRadius: 99, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs },

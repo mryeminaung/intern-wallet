@@ -1,148 +1,211 @@
-import type { BottomTabBarProps } from 'expo-router/build/layouts/Tabs';
-import { Fragment } from 'react';
-import { useRouter } from 'expo-router';
-import { ChartNoAxesCombined, House, Plus, ReceiptText, Target, type LucideIcon } from 'lucide-react-native';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '@/theme/colors';
-import { shadows, spacing } from '@/theme/spacing';
-import { fontFamily } from '@/theme/typography';
+import { colors } from "@/theme/colors";
+import { shadows, spacing } from "@/theme/spacing";
+import { fontFamily } from "@/theme/typography";
+import { useRouter } from "expo-router";
+import type { BottomTabBarProps } from "expo-router/build/layouts/Tabs";
+import {
+	ChartNoAxesCombined,
+	House,
+	Plus,
+	ReceiptText,
+	Target,
+	type LucideIcon,
+} from "lucide-react-native";
+import { Fragment } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const tabIcons: Record<string, LucideIcon> = {
-  index: House,
-  transactions: ReceiptText,
-  reports: ChartNoAxesCombined,
-  plan: Target,
+	index: House,
+	transactions: ReceiptText,
+	reports: ChartNoAxesCombined,
+	plan: Target,
 };
 
 const tabLabels: Record<string, string> = {
-  index: 'Today',
-  transactions: 'Activity',
-  reports: 'Insights',
-  plan: 'Plan',
+	index: "Today",
+	transactions: "Activity",
+	reports: "Insights",
+	plan: "Plan",
 };
 
-export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, insets }: BottomTabBarProps): React.JSX.Element {
-  const router = useRouter();
-  const contextInsets = useSafeAreaInsets();
-  const bottomInset = Math.max(insets.bottom, contextInsets.bottom);
+export function FloatingTabBar({
+	state,
+	descriptors,
+	emitter,
+	navigateToTab,
+	insets,
+}: BottomTabBarProps): React.JSX.Element {
+	const router = useRouter();
+	const contextInsets = useSafeAreaInsets();
+	const bottomInset = Math.max(insets.bottom, contextInsets.bottom);
 
-  return (
-    <View style={[styles.wrapper, { paddingBottom: Math.max(bottomInset, spacing.sm) }]}>
-      <View style={styles.container}>
-        {state.routes.map((route, index) => {
-          const descriptor = descriptors[route.key];
-          const options = descriptor.options;
-          const isFocused = state.index === index;
-          const Icon = tabIcons[route.name] ?? House;
-          const label = typeof options.tabBarLabel === 'string'
-            ? options.tabBarLabel
-            : options.title ?? tabLabels[route.name] ?? route.name;
-          const accessibilityLabel = options.tabBarAccessibilityLabel ?? `${label} tab`;
+	return (
+		<View
+			pointerEvents="box-none"
+			style={[
+				styles.wrapper,
+				{ paddingBottom: Math.max(bottomInset, spacing.sm) },
+			]}>
+			<View style={styles.container}>
+				{state.routes.map((route, index) => {
+					const descriptor = descriptors[route.key];
+					const options = descriptor.options;
+					const isFocused = state.index === index;
+					const Icon = tabIcons[route.name] ?? House;
+					const label =
+						typeof options.tabBarLabel === "string"
+							? options.tabBarLabel
+							: (options.title ?? tabLabels[route.name] ?? route.name);
+					const accessibilityLabel =
+						options.tabBarAccessibilityLabel ?? `${label} tab`;
 
-          const onPress = (): void => {
-            if (isFocused) {
-              return;
-            }
+					const onPress = (): void => {
+						if (isFocused) {
+							return;
+						}
 
-            const event = emitter.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
+						const event = emitter.emit({
+							type: "tabPress",
+							target: route.key,
+							canPreventDefault: true,
+						});
 
-            if (!event.defaultPrevented) {
-              navigateToTab(route.key);
-            }
-          };
+						if (!event.defaultPrevented) {
+							navigateToTab(route.key);
+						}
+					};
 
-          const tab = <Pressable
-              accessibilityLabel={accessibilityLabel}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: isFocused }}
-              key={route.key}
-              onPress={onPress}
-              style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
-            >
-              <View style={[styles.iconWrap, isFocused && styles.iconWrapActive]}><Icon color={isFocused ? colors.white : '#87938A'} size={21} strokeWidth={2.2} /></View>
-              <Text style={[styles.label, isFocused && styles.labelActive]}>{label}</Text>
-            </Pressable>;
+					const tab = (
+						<Pressable
+							accessibilityLabel={accessibilityLabel}
+							accessibilityRole="tab"
+							accessibilityState={{ selected: isFocused }}
+							key={route.key}
+							onPress={onPress}
+							style={({ pressed }) => [
+								styles.item,
+								pressed && styles.itemPressed,
+							]}>
+							<View
+								style={[styles.iconWrap, isFocused && styles.iconWrapActive]}>
+								<Icon
+									color={isFocused ? colors.white : "#87938A"}
+									size={21}
+									strokeWidth={2.2}
+								/>
+							</View>
+							<Text style={[styles.label, isFocused && styles.labelActive]}>
+								{label}
+							</Text>
+						</Pressable>
+					);
 
-          return <Fragment key={route.key}>
-            {index === 2 ? <Pressable accessibilityLabel="Add transaction" accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={({ pressed }) => [styles.addItem, pressed && styles.itemPressed]}><View style={styles.addButton}><Plus color={colors.white} size={24} strokeWidth={2.4} /></View><Text style={styles.addLabel}>Add</Text></Pressable> : null}
-            {tab}
-          </Fragment>;
-        })}
-      </View>
-    </View>
-  );
+					return (
+						<Fragment key={route.key}>
+							{index === 2 ? (
+								<Pressable
+									accessibilityLabel="Add transaction"
+									accessibilityRole="button"
+									onPress={() => router.push("/transactions/new")}
+									style={({ pressed }) => [
+										styles.addItem,
+										pressed && styles.itemPressed,
+									]}>
+									<View style={styles.addButton}>
+										<Plus
+											color={colors.white}
+											size={24}
+											strokeWidth={2.4}
+										/>
+									</View>
+									<Text style={styles.addLabel}>Add</Text>
+								</Pressable>
+							) : null}
+							{tab}
+						</Fragment>
+					);
+				})}
+			</View>
+		</View>
+	);
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    backgroundColor: colors.background,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
-  },
-  container: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.96)',
-    borderColor: 'rgba(226, 231, 225, 0.96)',
-    borderRadius: 30,
-    flexDirection: 'row',
-    minHeight: 74,
-    paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.xs,
-    ...shadows.floating,
-  },
-  item: {
-    alignItems: 'center',
-    flex: 1,
-    gap: 2,
-    justifyContent: 'center',
-    minHeight: 62,
-    minWidth: 0,
-    paddingHorizontal: 2,
-    paddingVertical: spacing.xs,
-  },
-  addItem: { alignItems: 'center', flex: 1, justifyContent: 'center', minHeight: 62, minWidth: 0 },
-  iconWrap: {
-    alignItems: 'center',
-    borderRadius: 19,
-    height: 38,
-    justifyContent: 'center',
-    overflow: 'hidden',
-    width: 38,
-  },
-  iconWrapActive: {
-    backgroundColor: colors.forest,
-    borderRadius: 19,
-  },
-  itemPressed: {
-    opacity: 0.78,
-  },
-  label: {
-    fontFamily: fontFamily.medium,
-    fontSize: 11,
-    color: '#87938A',
-  },
-  labelActive: {
-    color: colors.forest,
-    fontFamily: fontFamily.semiBold,
-  },
-  addButton: {
-    alignItems: 'center',
-    backgroundColor: colors.forest,
-    borderRadius: 99,
-    height: 42,
-    justifyContent: 'center',
-    width: 42,
-    ...shadows.floating,
-  },
-  addLabel: {
-    color: colors.forest,
-    fontFamily: fontFamily.semiBold,
-    fontSize: 11,
-    textAlign: 'center',
-  },
+	wrapper: {
+		bottom: 0,
+		left: 0,
+		paddingHorizontal: spacing.md,
+		paddingTop: spacing.xs,
+		position: "absolute",
+		right: 0,
+		zIndex: 10,
+	},
+	container: {
+		alignItems: "center",
+		backgroundColor: "rgba(255, 255, 255, 0.96)",
+		borderColor: "rgba(226, 231, 225, 0.96)",
+		borderRadius: 50,
+		flexDirection: "row",
+		minHeight: 74,
+		paddingHorizontal: spacing.xs,
+		paddingVertical: spacing.xs,
+		...shadows.floating,
+	},
+	item: {
+		alignItems: "center",
+		flex: 1,
+		gap: 2,
+		justifyContent: "center",
+		minHeight: 62,
+		minWidth: 0,
+		paddingHorizontal: 2,
+		paddingVertical: spacing.xs,
+	},
+	addItem: {
+		alignItems: "center",
+		flex: 1,
+		justifyContent: "center",
+		minHeight: 62,
+		minWidth: 0,
+	},
+	iconWrap: {
+		alignItems: "center",
+		borderRadius: 19,
+		height: 38,
+		justifyContent: "center",
+		overflow: "hidden",
+		width: 38,
+	},
+	iconWrapActive: {
+		backgroundColor: colors.forest,
+		borderRadius: 19,
+	},
+	itemPressed: {
+		opacity: 0.78,
+	},
+	label: {
+		fontFamily: fontFamily.medium,
+		fontSize: 11,
+		color: "#87938A",
+	},
+	labelActive: {
+		color: colors.forest,
+		fontFamily: fontFamily.semiBold,
+	},
+	addButton: {
+		alignItems: "center",
+		backgroundColor: colors.forest,
+		borderRadius: 99,
+		height: 42,
+		justifyContent: "center",
+		width: 42,
+		...shadows.floating,
+	},
+	addLabel: {
+		color: colors.forest,
+		fontFamily: fontFamily.semiBold,
+		fontSize: 11,
+		textAlign: "center",
+	},
 });

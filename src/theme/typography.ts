@@ -1,8 +1,8 @@
 export const fontFamily = {
-  regular: 'Inter_400Regular',
-  medium: 'Inter_500Medium',
-  semiBold: 'Inter_600SemiBold',
-  bold: 'Inter_700Bold',
+  regular: 'DMSans_400Regular',
+  medium: 'DMSans_500Medium',
+  semiBold: 'DMSans_600SemiBold',
+  bold: 'DMSans_700Bold',
   myanmar: 'NotoSansMyanmar_400Regular',
 } as const;
 

@@ -10,6 +10,7 @@ import {
   type TransactionFormValues,
   TransactionService,
   useTransactionCategories,
+  useBankNames,
 } from '@/features/transactions';
 
 import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
@@ -25,6 +26,7 @@ export default function EditTransactionScreen(): React.JSX.Element {
   const params = useLocalSearchParams<{ id: string | string[] }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { categories, loading: categoriesLoading, error: categoryError } = useTransactionCategories();
+  const bankNames = useBankNames();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -86,8 +88,9 @@ export default function EditTransactionScreen(): React.JSX.Element {
         <TransactionForm
           key={transaction.id}
           categories={categories}
+          bankNames={bankNames}
           error={error}
-          initialValues={{ type: transaction.type, amount: String(transaction.amount), categoryId: transaction.categoryId, date: transaction.date, note: transaction.note ?? '' }}
+          initialValues={{ type: transaction.type, amount: String(transaction.amount), categoryId: transaction.categoryId, sourceType: transaction.sourceType ?? undefined, bankName: transaction.bankName ?? '', date: transaction.date, note: transaction.note ?? '' }}
           onSubmit={handleSubmit}
           submitLabel="Save changes"
           submitting={submitting}
@@ -98,10 +101,10 @@ export default function EditTransactionScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', flexDirection: 'row', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
+  header: { alignItems: 'center', flexDirection: 'row', paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.sm },
   backButton: { alignItems: 'center', height: 40, justifyContent: 'center', width: 40 },
   headerSpacer: { width: 40 },
   title: { color: colors.text, flex: 1, fontFamily: fontFamily.bold, fontSize: 20, textAlign: 'center' },
-  status: { color: colors.textMuted, fontFamily: fontFamily.regular, paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  error: { color: colors.expense, fontFamily: fontFamily.regular, padding: spacing.lg },
+  status: { color: colors.textMuted, fontFamily: fontFamily.regular, paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop },
+  error: { color: colors.expense, fontFamily: fontFamily.regular, paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop },
 });

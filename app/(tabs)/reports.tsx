@@ -10,6 +10,7 @@ import {
   FinancialInsights,
   IncomeExpenseChart,
   IncomeSourceBreakdown,
+  MoneyFlowBreakdown,
   SpendingTrend,
   useReports,
 } from '@/features/reports';
@@ -28,6 +29,7 @@ export default function ReportsScreen(): React.JSX.Element {
   const router = useRouter();
   const setTransactionType = useTransactionFilterStore((state) => state.setType);
   const setTransactionCategory = useTransactionFilterStore((state) => state.setCategoryId);
+  const setTransactionSource = useTransactionFilterStore((state) => state.setSourceKey);
   const [mode, setMode] = useState<PeriodMode>('month');
   const [periodOffset, setPeriodOffset] = useState(0);
   const [customFrom, setCustomFrom] = useState<Date>(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
@@ -60,7 +62,6 @@ export default function ReportsScreen(): React.JSX.Element {
   };
 
   return <Screen><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-    <Text style={styles.eyebrow}>MONEY STORIES</Text>
     <Text style={styles.title}>Insights</Text>
     <Text style={styles.subtitle}>Understand what changed and what to do next.</Text>
 
@@ -78,7 +79,8 @@ export default function ReportsScreen(): React.JSX.Element {
       <IncomeExpenseChart months={data.monthlySpending} />
       <SpendingTrend points={data.dailySpending} />
       <CategoryBreakdown categories={data.categories} totalExpenses={data.totalExpenses} />
-      <IncomeSourceBreakdown sources={data.incomeSources} onPressSource={(categoryId) => { setTransactionType('income'); setTransactionCategory(categoryId); router.push('/transactions'); }} />
+      <IncomeSourceBreakdown sources={data.incomeSources} onPressSource={(categoryId) => { setTransactionType('income'); setTransactionCategory(categoryId); setTransactionSource(null); router.push('/transactions'); }} />
+      <MoneyFlowBreakdown rows={data.moneyFlows} />
       <BudgetPerformance budget={data.budget} onOpenBudget={() => router.push('/budget')} />
     </> : null}
   </ScrollView></Screen>;
@@ -93,7 +95,7 @@ function Summary({ icon: Icon, label, value, color, background }: { icon: typeof
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.tabBarClearance },
   eyebrow: { color: colors.income, fontFamily: fontFamily.semiBold, fontSize: 11, letterSpacing: 1.3, marginTop: spacing.sm },
   title: { color: colors.text, fontFamily: fontFamily.bold, fontSize: 30, marginTop: spacing.xs },
   subtitle: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 15, marginTop: spacing.xs },

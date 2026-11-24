@@ -3,7 +3,7 @@ import type { BudgetRepository } from '@/database/repositories/budget.repository
 import {
   reportPeriodForMonth,
   ReportsService,
-} from '@/features/reports';
+} from '@/features/reports/services/reports.service';
 
 describe('ReportsService', () => {
   it('calculates net savings, daily average, and category percentages from aggregates', async () => {
@@ -14,6 +14,7 @@ describe('ReportsService', () => {
         { categoryId: 'bus', categoryName: 'Transportation', categoryIcon: '🚌', amount: 3000 },
       ]),
       getIncomeSourceBreakdown: jest.fn().mockResolvedValue([{ categoryId: 'salary', categoryName: 'Salary', categoryIcon: '💼', amount: 30000 }]),
+      getMoneyFlows: jest.fn().mockResolvedValue([{ sourceType: 'cash', bankName: null, income: 30000, expenses: 12000 }]),
       getDailySpending: jest.fn().mockResolvedValue([]),
       getMonthlySpending: jest.fn().mockResolvedValue([]),
       getHighestExpense: jest.fn().mockResolvedValue(null),
@@ -27,6 +28,7 @@ describe('ReportsService', () => {
 
     expect(report.totalIncome).toBe(30000);
     expect(report.incomeSources).toEqual([{ categoryId: 'salary', categoryName: 'Salary', categoryIcon: '💼', amount: 30000, percentage: 100 }]);
+    expect(report.moneyFlows).toEqual([{ sourceType: 'cash', bankName: null, income: 30000, expenses: 12000 }]);
     expect(report.totalExpenses).toBe(12000);
     expect(report.netSavings).toBe(18000);
     expect(report.averageDailySpending).toBe(4000);
@@ -40,6 +42,7 @@ describe('ReportsService', () => {
       getTotals: jest.fn().mockResolvedValue({ income: 0, expenses: 0 }),
       getCategorySpending: jest.fn().mockResolvedValue([]),
       getIncomeSourceBreakdown: jest.fn().mockResolvedValue([]),
+      getMoneyFlows: jest.fn().mockResolvedValue([]),
       getDailySpending: jest.fn().mockResolvedValue([]),
       getMonthlySpending: jest.fn().mockResolvedValue([{ month: '2026-11', income: 0, expenses: 0 }]),
       getHighestExpense: jest.fn().mockResolvedValue(null),
@@ -66,6 +69,7 @@ describe('ReportsService', () => {
       getTotals: jest.fn().mockResolvedValue({ income: 100000, expenses: 40000 }),
       getCategorySpending: jest.fn().mockResolvedValue([{ categoryId: 'food', categoryName: 'Food', categoryIcon: '🍜', amount: 40000 }]),
       getIncomeSourceBreakdown: jest.fn().mockResolvedValue([]),
+      getMoneyFlows: jest.fn().mockResolvedValue([]),
       getDailySpending: jest.fn().mockResolvedValue([]),
       getMonthlySpending: jest.fn().mockResolvedValue([{ month: '2026-11', income: 100000, expenses: 40000 }]),
       getHighestExpense: jest.fn().mockResolvedValue({ id: 't1', type: 'expense', amount: 15000, categoryId: 'food', categoryName: 'Food', categoryIcon: '🍜', note: 'Lunch', date: '2026-11-02T00:00:00.000Z', createdAt: '2026-11-02T00:00:00.000Z', updatedAt: '2026-11-02T00:00:00.000Z' }),

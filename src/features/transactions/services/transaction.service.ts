@@ -48,6 +48,12 @@ export class TransactionService {
     if (!isValidDateString(input.date)) {
       throw new TransactionServiceError('Choose a valid transaction date.');
     }
+    if (input.sourceType === 'bank' && (!input.bankName?.trim() || input.bankName.trim().length > 40)) {
+      throw new TransactionServiceError('Choose a bank name up to 40 characters.');
+    }
+    if (input.sourceType !== 'bank' && input.bankName?.trim()) {
+      throw new TransactionServiceError('Bank name is only available when Bank is selected.');
+    }
 
     const category = await this.categories.getById(input.categoryId);
     if (!category) {

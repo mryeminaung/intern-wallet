@@ -25,7 +25,7 @@ export function useTransactions(filters: TransactionFilter): {
     } finally {
       setLoading(false);
     }
-  }, [database, filters.categoryId, filters.fromDate, filters.maxAmount, filters.minAmount, filters.search, filters.sort, filters.toDate, filters.type]);
+  }, [database, filters.categoryId, filters.sourceKey, filters.fromDate, filters.maxAmount, filters.minAmount, filters.search, filters.sort, filters.toDate, filters.type]);
 
   useEffect(() => {
     void refresh();
