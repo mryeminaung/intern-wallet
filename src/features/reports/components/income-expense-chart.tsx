@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
-import { colors } from '../../../theme/colors';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
-import type { MonthlySpendingRow } from '../../../database/repositories/analytics.repository';
+import { colors } from '@/theme/colors';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { MonthlySpendingRow } from '@/database/repositories/analytics.repository';
 
 export function IncomeExpenseChart({ months }: { months: readonly MonthlySpendingRow[] }): React.JSX.Element {
   const chartData = months.flatMap((month) => [
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   legend: { flexDirection: 'row', gap: spacing.sm },
   legendItem: { alignItems: 'center', flexDirection: 'row', gap: 4 },
   dot: { borderRadius: 99, height: 7, width: 7 },
-  legendText: { color: colors.textMuted, fontFamily: fontFamily.medium, fontSize: 10 },
-  axis: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 9 },
+  legendText: { color: colors.textMuted, fontFamily: fontFamily.medium, fontSize: 11 },
+  axis: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 10 },
   empty: { color: colors.textMuted, fontFamily: fontFamily.regular },
 });

@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Screen } from './Screen';
-import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
-import { fontFamily } from '../../theme/typography';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
 
 type PlaceholderScreenProps = {
   title: string;

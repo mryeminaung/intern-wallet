@@ -1,7 +1,7 @@
-import { calendarDaysInclusive, dateKey, endOfDayIso, monthPeriod, startOfDayIso } from '../../../lib/date';
-import { settingKeys } from '../../../lib/constants';
-import type { AnalyticsRepository } from '../../../database/repositories/analytics.repository';
-import type { SettingsRepository } from '../../../database/repositories/settings.repository';
+import { calendarDaysInclusive, dateKey, endOfDayIso, monthPeriod, startOfDayIso } from '@/lib/date';
+import { settingKeys } from '@/lib/constants';
+import type { AnalyticsRepository } from '@/database/repositories/analytics.repository';
+import type { SettingsRepository } from '@/database/repositories/settings.repository';
 
 export type DailyBudgetSettings = {
   dailyLimit: number | null;

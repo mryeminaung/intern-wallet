@@ -1,8 +1,8 @@
-import { periodForMonth } from '../../../lib/date';
-import type { AnalyticsRepository } from '../../../database/repositories/analytics.repository';
-import type { BudgetRepository } from '../../../database/repositories/budget.repository';
-import type { CategoryRepository } from '../../../database/repositories/category.repository';
-import type { Budget, BudgetProgress, Category, CreateBudgetInput } from '../../../types/common';
+import { periodForMonth } from '@/lib/date';
+import type { AnalyticsRepository } from '@/database/repositories/analytics.repository';
+import type { BudgetRepository } from '@/database/repositories/budget.repository';
+import type { CategoryRepository } from '@/database/repositories/category.repository';
+import type { Budget, BudgetProgress, Category, CreateBudgetInput } from '@/types/common';
 
 export class BudgetServiceError extends Error {
   public constructor(message: string) {

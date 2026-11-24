@@ -1,7 +1,7 @@
 import { InputAccessoryView, Keyboard, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
-import { fontFamily } from '../../theme/typography';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
 
 export function KeyboardDoneAccessory({ nativeID }: { nativeID: string }): React.JSX.Element | null {
   if (Platform.OS !== 'ios') return null;

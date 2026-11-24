@@ -1,8 +1,11 @@
 import { useCallback, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { SqliteAnalyticsRepository } from '../../../database/repositories/analytics.repository';
-import { SqliteBudgetRepository } from '../../../database/repositories/budget.repository';
-import { DashboardService, type DashboardData } from '../services/dashboard.service';
+import { SqliteAnalyticsRepository } from '@/database/repositories/analytics.repository';
+import { SqliteBudgetRepository } from '@/database/repositories/budget.repository';
+import {
+  type DashboardData,
+  DashboardService,
+} from '@/features/dashboard/services/dashboard.service';
 
 export function useDashboard(): {
   data: DashboardData | null;

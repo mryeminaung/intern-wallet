@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { randomUUID } from 'expo-crypto';
-import type { Category, TransactionType } from '../../types/common';
+import type { Category, TransactionType } from '@/types/common';
 
 type CategoryRow = {
   id: string;

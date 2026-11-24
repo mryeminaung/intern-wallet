@@ -3,14 +3,14 @@ import { ActivityIndicator, Alert, Keyboard, Pressable, StyleSheet, Text, TextIn
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ArrowLeft } from 'lucide-react-native';
-import { Screen } from '../src/components/shared/Screen';
-import { KeyboardAwareScrollView } from '../src/components/shared/KeyboardAwareScrollView';
-import { SqliteCategoryRepository } from '../src/database/repositories/category.repository';
-import { CategoryService } from '../src/features/categories/services/category.service';
-import type { Category, TransactionType } from '../src/types/common';
-import { colors } from '../src/theme/colors';
-import { fontFamily } from '../src/theme/typography';
-import { radii, spacing } from '../src/theme/spacing';
+import { Screen } from '@/components/shared/Screen';
+import { KeyboardAwareScrollView } from '@/components/shared/KeyboardAwareScrollView';
+import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
+import { CategoryService } from '@/features/categories';
+import type { Category, TransactionType } from '@/types/common';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, spacing } from '@/theme/spacing';
 
 export default function CategoriesScreen(): React.JSX.Element {
   const router = useRouter();

@@ -1,9 +1,9 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react-native';
 import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { colors } from '../../../theme/colors';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
-import type { TransactionType } from '../../../types/common';
+import { colors } from '@/theme/colors';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { TransactionType } from '@/types/common';
 
 type TransactionFilterProps = {
   search: string;
@@ -25,9 +25,9 @@ const styles = StyleSheet.create({
   row: { gap: spacing.sm, paddingVertical: spacing.sm },
   chip: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 99, borderWidth: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   selected: { backgroundColor: colors.forest, borderColor: colors.forest },
-  chipText: { color: colors.textMuted, fontFamily: fontFamily.medium, fontSize: 12 },
+  chipText: { color: colors.textMuted, fontFamily: fontFamily.medium, fontSize: 13 },
   selectedText: { color: colors.white },
   advanced: { alignItems: 'center', borderColor: colors.border, borderRadius: 99, borderWidth: 1, flexDirection: 'row', gap: spacing.xs, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   advancedActive: { backgroundColor: colors.forest, borderColor: colors.forest },
-  advancedText: { color: colors.forest, fontFamily: fontFamily.medium, fontSize: 12 },
+  advancedText: { color: colors.forest, fontFamily: fontFamily.medium, fontSize: 13 },
 });

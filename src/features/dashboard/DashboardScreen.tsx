@@ -1,20 +1,24 @@
 import { useCallback } from 'react';
 import { AppState, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Screen } from '../../components/shared/Screen';
-import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
-import { fontFamily } from '../../theme/typography';
-import { millisecondsUntilNextLocalDay } from '../../lib/date';
-import { useDashboard } from './hooks/use-dashboard';
-import { useDailyBudget } from '../budget/hooks/use-daily-budget';
-import { BalanceCard } from './components/balance-card';
-import { DailyBudgetCard } from './components/daily-budget-card';
-import { FinancialSummary } from './components/financial-summary';
-import { QuickActions } from './components/quick-actions';
-import { RecentTransactions } from './components/recent-transactions';
-import { ProfileAvatar } from '../profile/components/profile-avatar';
-import { useProfile } from '../profile/hooks/use-profile';
+import { Screen } from '@/components/shared/Screen';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import { millisecondsUntilNextLocalDay } from '@/lib/date';
+import { useDashboard } from '@/features/dashboard/hooks/use-dashboard';
+import { useDailyBudget } from '@/features/budget';
+import {
+  BalanceCard,
+  DailyBudgetCard,
+  FinancialSummary,
+  QuickActions,
+  RecentTransactions,
+} from '@/features/dashboard/components';
+import {
+  ProfileAvatar,
+  useProfile,
+} from '@/features/profile';
 
 export function DashboardScreen(): React.JSX.Element {
   const router = useRouter();
@@ -54,8 +58,9 @@ export function DashboardScreen(): React.JSX.Element {
     {data ? <>
       {dailyBudget ? <DailyBudgetCard data={dailyBudget} onOpen={() => router.push('/daily-budget')} /> : null}
       <QuickActions onAddExpense={() => router.push('/transactions/new?type=expense')} onAddIncome={() => router.push('/transactions/new?type=income')} />
-      <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>This month</Text><Pressable accessibilityRole="button" onPress={() => router.push('/reports')}><Text style={styles.sectionLink}>View insights</Text></Pressable></View>
+      <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Wallet balance</Text></View>
       <BalanceCard balance={data.balance} />
+      <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>This month</Text><Pressable accessibilityRole="button" onPress={() => router.push('/reports')}><Text style={styles.sectionLink}>View insights</Text></Pressable></View>
       <FinancialSummary expenses={data.monthExpenses} income={data.monthIncome} />
       {dailyBudgetLoading ? <Text style={styles.status}>Loading daily budget…</Text> : null}
       {dailyBudgetError ? <Text style={styles.error}>{dailyBudgetError}</Text> : null}

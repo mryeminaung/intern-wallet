@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { TransactionType } from '../types/common';
+import type { TransactionType } from '@/types/common';
 
 type TransactionFilterState = {
   type: TransactionType | 'all';

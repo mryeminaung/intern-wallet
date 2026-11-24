@@ -1,9 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import type { ReportCategory } from '../services/reports.service';
-import { formatMMK } from '../../../lib/currency';
-import { colors } from '../../../theme/colors';
-import { fontFamily } from '../../../theme/typography';
-import { radii, spacing } from '../../../theme/spacing';
+import type { ReportCategory } from '@/features/reports/services/reports.service';
+import { formatMMK } from '@/lib/currency';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, spacing } from '@/theme/spacing';
 
 export function IncomeSourceBreakdown({ sources, onPressSource }: {
   sources: readonly ReportCategory[];

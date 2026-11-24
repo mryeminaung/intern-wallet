@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
-import { APP_NAME } from '../../lib/constants';
-import { formatDisplayDate } from '../../lib/date';
-import { SqliteTransactionRepository } from '../../database/repositories/transaction.repository';
-import { colors } from '../../theme/colors';
-import { radii, spacing } from '../../theme/spacing';
-import { fontFamily } from '../../theme/typography';
-import { Screen } from '../../components/shared/Screen';
-import { Surface } from '../../components/ui/Surface';
+import { APP_NAME } from '@/lib/constants';
+import { formatDisplayDate } from '@/lib/date';
+import { SqliteTransactionRepository } from '@/database/repositories/transaction.repository';
+import { colors } from '@/theme/colors';
+import { radii, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import { Screen } from '@/components/shared/Screen';
+import { Surface } from '@/components/ui/Surface';
 
 export function DashboardPlaceholder(): React.JSX.Element {
   const database = useSQLiteContext();

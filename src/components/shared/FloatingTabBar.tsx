@@ -1,11 +1,12 @@
 import type { BottomTabBarProps } from 'expo-router/build/layouts/Tabs';
+import { Fragment } from 'react';
 import { useRouter } from 'expo-router';
 import { ChartNoAxesCombined, House, Plus, ReceiptText, Target, type LucideIcon } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '../../theme/colors';
-import { shadows, spacing } from '../../theme/spacing';
-import { fontFamily } from '../../theme/typography';
+import { colors } from '@/theme/colors';
+import { shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
 
 const tabIcons: Record<string, LucideIcon> = {
   index: House,
@@ -67,11 +68,10 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, ins
               <Text style={[styles.label, isFocused && styles.labelActive]}>{label}</Text>
             </Pressable>;
 
-          if (index === 2) {
-            return <View key={route.key} style={styles.segment}><Pressable accessibilityLabel="Add transaction" accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={({ pressed }) => [styles.addButton, pressed && styles.itemPressed]}><Plus color={colors.white} size={27} strokeWidth={2.4} /></Pressable><Text style={styles.addLabel}>Add</Text>{tab}</View>;
-          }
-
-          return tab;
+          return <Fragment key={route.key}>
+            {index === 2 ? <Pressable accessibilityLabel="Add transaction" accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={({ pressed }) => [styles.addItem, pressed && styles.itemPressed]}><View style={styles.addButton}><Plus color={colors.white} size={24} strokeWidth={2.4} /></View><Text style={styles.addLabel}>Add</Text></Pressable> : null}
+            {tab}
+          </Fragment>;
         })}
       </View>
     </View>
@@ -100,11 +100,12 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
     justifyContent: 'center',
-    minHeight: 60,
+    minHeight: 62,
     minWidth: 0,
     paddingHorizontal: 2,
     paddingVertical: spacing.xs,
   },
+  addItem: { alignItems: 'center', flex: 1, justifyContent: 'center', minHeight: 62, minWidth: 0 },
   iconWrap: {
     alignItems: 'center',
     borderRadius: 19,
@@ -122,39 +123,26 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: fontFamily.medium,
-    fontSize: 10,
+    fontSize: 11,
     color: '#87938A',
   },
   labelActive: {
     color: colors.forest,
     fontFamily: fontFamily.semiBold,
   },
-  segment: {
-    alignItems: 'center',
-    flex: 2,
-    flexDirection: 'row',
-  },
   addButton: {
     alignItems: 'center',
-    alignSelf: 'flex-start',
     backgroundColor: colors.forest,
-    borderColor: colors.background,
     borderRadius: 99,
-    borderWidth: 5,
-    height: 62,
+    height: 42,
     justifyContent: 'center',
-    marginTop: -19,
-    width: 62,
+    width: 42,
     ...shadows.floating,
   },
   addLabel: {
     color: colors.forest,
     fontFamily: fontFamily.semiBold,
-    fontSize: 10,
-    left: 0,
-    position: 'absolute',
-    top: 45,
-    width: 62,
+    fontSize: 11,
     textAlign: 'center',
   },
 });

@@ -3,17 +3,17 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, CalendarDays, CopyPlus, Pencil, Tag, Trash2 } from 'lucide-react-native';
 import { useSQLiteContext } from 'expo-sqlite';
-import { Screen } from '../../src/components/shared/Screen';
-import { Surface } from '../../src/components/ui/Surface';
-import { SqliteCategoryRepository } from '../../src/database/repositories/category.repository';
-import { SqliteTransactionRepository } from '../../src/database/repositories/transaction.repository';
-import { TransactionService } from '../../src/features/transactions/services/transaction.service';
-import { formatMMK } from '../../src/lib/currency';
-import { formatDisplayDate } from '../../src/lib/date';
-import { colors } from '../../src/theme/colors';
-import { radii, spacing } from '../../src/theme/spacing';
-import { fontFamily } from '../../src/theme/typography';
-import type { Category, Transaction } from '../../src/types/common';
+import { Screen } from '@/components/shared/Screen';
+import { Surface } from '@/components/ui/Surface';
+import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
+import { SqliteTransactionRepository } from '@/database/repositories/transaction.repository';
+import { TransactionService } from '@/features/transactions';
+import { formatMMK } from '@/lib/currency';
+import { formatDisplayDate } from '@/lib/date';
+import { colors } from '@/theme/colors';
+import { radii, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { Category, Transaction } from '@/types/common';
 
 export default function TransactionDetailsScreen(): React.JSX.Element {
   const router = useRouter();

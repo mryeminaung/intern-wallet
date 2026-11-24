@@ -2,14 +2,16 @@ import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react-native';
-import { Screen } from '../src/components/shared/Screen';
-import { useDailyHistory } from '../src/features/budget/hooks/use-daily-history';
-import { formatMMK } from '../src/lib/currency';
-import { formatDisplayDate, formatMonth } from '../src/lib/date';
-import { colors } from '../src/theme/colors';
-import { fontFamily } from '../src/theme/typography';
-import { radii, spacing } from '../src/theme/spacing';
-import type { DailyHistoryDay } from '../src/features/budget/services/daily-budget.service';
+import { Screen } from '@/components/shared/Screen';
+import {
+  type DailyHistoryDay,
+  useDailyHistory,
+} from '@/features/budget';
+import { formatMMK } from '@/lib/currency';
+import { formatDisplayDate, formatMonth } from '@/lib/date';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, spacing } from '@/theme/spacing';
 
 export default function DailyHistoryScreen(): React.JSX.Element {
   const router = useRouter();

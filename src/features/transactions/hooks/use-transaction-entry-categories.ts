@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { SqliteCategoryRepository } from '../../../database/repositories/category.repository';
-import type { Category, TransactionType } from '../../../types/common';
+import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
+import type { Category, TransactionType } from '@/types/common';
 
 type CategoryIdsByType = Record<TransactionType, readonly string[]>;
 

@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Setting } from '../../types/common';
+import type { Setting } from '@/types/common';
 
 export interface SettingsRepository {
   get(key: string): Promise<string | null>;

@@ -1,8 +1,11 @@
 import { useCallback, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { SqliteAnalyticsRepository } from '../../../database/repositories/analytics.repository';
-import { SqliteSettingsRepository } from '../../../database/repositories/settings.repository';
-import { DailyBudgetService, type DailyBudgetSummary } from '../services/daily-budget.service';
+import { SqliteAnalyticsRepository } from '@/database/repositories/analytics.repository';
+import { SqliteSettingsRepository } from '@/database/repositories/settings.repository';
+import {
+  DailyBudgetService,
+  type DailyBudgetSummary,
+} from '@/features/budget/services/daily-budget.service';
 
 export function useDailyBudget(): {
   data: DailyBudgetSummary | null;

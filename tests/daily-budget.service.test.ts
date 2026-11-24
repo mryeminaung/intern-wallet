@@ -1,8 +1,8 @@
-import type { AnalyticsRepository } from '../src/database/repositories/analytics.repository';
-import type { SettingsRepository } from '../src/database/repositories/settings.repository';
-import { DailyBudgetService } from '../src/features/budget/services/daily-budget.service';
-import { settingKeys } from '../src/lib/constants';
-import { endOfDayIso, startOfDayIso } from '../src/lib/date';
+import type { AnalyticsRepository } from '@/database/repositories/analytics.repository';
+import type { SettingsRepository } from '@/database/repositories/settings.repository';
+import { DailyBudgetService } from '@/features/budget';
+import { settingKeys } from '@/lib/constants';
+import { endOfDayIso, startOfDayIso } from '@/lib/date';
 
 function settings(values: Record<string, string>): SettingsRepository {
   return { get: jest.fn(async (key: string) => values[key] ?? null), set: jest.fn(), setMany: jest.fn(), list: jest.fn() };

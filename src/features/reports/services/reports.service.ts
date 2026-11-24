@@ -1,7 +1,7 @@
-import { daysBetween, effectiveDaysForPeriod, formatMonth, monthPeriod, periodForMonth, type DatePeriod } from '../../../lib/date';
-import type { AnalyticsRepository, CategorySpendingRow, DailySpendingRow, ExpenseTransactionRow, MonthlySpendingRow } from '../../../database/repositories/analytics.repository';
-import type { BudgetRepository } from '../../../database/repositories/budget.repository';
-import type { BudgetStatus } from '../../../types/common';
+import { daysBetween, effectiveDaysForPeriod, formatMonth, monthPeriod, periodForMonth, type DatePeriod } from '@/lib/date';
+import type { AnalyticsRepository, CategorySpendingRow, DailySpendingRow, ExpenseTransactionRow, MonthlySpendingRow } from '@/database/repositories/analytics.repository';
+import type { BudgetRepository } from '@/database/repositories/budget.repository';
+import type { BudgetStatus } from '@/types/common';
 
 export type ReportCategory = CategorySpendingRow & { percentage: number };
 

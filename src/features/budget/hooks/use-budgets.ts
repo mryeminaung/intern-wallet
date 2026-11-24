@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { SqliteAnalyticsRepository } from '../../../database/repositories/analytics.repository';
-import { SqliteBudgetRepository } from '../../../database/repositories/budget.repository';
-import { SqliteCategoryRepository } from '../../../database/repositories/category.repository';
-import { BudgetService, type BudgetSummary } from '../services/budget.service';
+import { SqliteAnalyticsRepository } from '@/database/repositories/analytics.repository';
+import { SqliteBudgetRepository } from '@/database/repositories/budget.repository';
+import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
+import {
+  BudgetService,
+  type BudgetSummary,
+} from '@/features/budget/services/budget.service';
 
 export function useBudgets(month: string): {
   summary: BudgetSummary | null;

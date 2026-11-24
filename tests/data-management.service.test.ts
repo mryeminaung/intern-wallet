@@ -1,6 +1,6 @@
-import type { DataManagementRepository } from '../src/database/repositories/data-management.repository';
-import { DataManagementService } from '../src/features/data-management/services/data-management.service';
-import { settingKeys } from '../src/lib/constants';
+import type { DataManagementRepository } from '@/database/repositories/data-management.repository';
+import { DataManagementService } from '@/features/data-management';
+import { settingKeys } from '@/lib/constants';
 
 describe('DataManagementService', () => {
   it('backs up portable profile text without exporting a device-local photo path', async () => {

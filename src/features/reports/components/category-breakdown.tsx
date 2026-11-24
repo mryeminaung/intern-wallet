@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { PieChart, type pieDataItem } from 'react-native-gifted-charts';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { formatMMK } from '../../../lib/currency';
-import { colors } from '../../../theme/colors';
-import { fontFamily } from '../../../theme/typography';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import type { ReportCategory } from '../services/reports.service';
+import { formatMMK } from '@/lib/currency';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import type { ReportCategory } from '@/features/reports/services/reports.service';
 
 const categoryColors = ['#25865A', '#7E9F8C', '#D5A45B', '#8293B8', '#B7A5C9', '#D65B5B', '#5D8D9A', '#9B7A63'];
 

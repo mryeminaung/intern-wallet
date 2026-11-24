@@ -3,24 +3,29 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowLeft, ChevronLeft, ChevronRight, Plus } from 'lucide-react-native';
 import { useSQLiteContext } from 'expo-sqlite';
-import { Screen } from '../src/components/shared/Screen';
-import { KeyboardAwareScrollView } from '../src/components/shared/KeyboardAwareScrollView';
-import { BudgetForm } from '../src/features/budget/components/budget-form';
-import { BudgetCard } from '../src/features/budget/components/budget-card';
-import { CategoryBudgetItem } from '../src/features/budget/components/category-budget-item';
-import { useBudgets } from '../src/features/budget/hooks/use-budgets';
-import { BudgetService } from '../src/features/budget/services/budget.service';
-import { budgetFormSchema, formValuesToBudgetInput, type BudgetFormValues } from '../src/features/budget/schemas/budget.schema';
-import { SqliteAnalyticsRepository } from '../src/database/repositories/analytics.repository';
-import { SqliteBudgetRepository } from '../src/database/repositories/budget.repository';
-import { SqliteCategoryRepository } from '../src/database/repositories/category.repository';
-import { formatMMK } from '../src/lib/currency';
-import { formatMonth, periodForMonth } from '../src/lib/date';
-import { colors } from '../src/theme/colors';
-import { radii, shadows, spacing } from '../src/theme/spacing';
-import { fontFamily } from '../src/theme/typography';
-import { useTransactionCategories } from '../src/features/transactions/hooks/use-transaction-categories';
-import type { BudgetProgress } from '../src/types/common';
+import { Screen } from '@/components/shared/Screen';
+import { KeyboardAwareScrollView } from '@/components/shared/KeyboardAwareScrollView';
+import {
+  BudgetCard,
+  BudgetForm,
+  budgetFormSchema,
+  type BudgetFormValues,
+  BudgetService,
+  CategoryBudgetItem,
+  formValuesToBudgetInput,
+  useBudgets,
+} from '@/features/budget';
+
+import { SqliteAnalyticsRepository } from '@/database/repositories/analytics.repository';
+import { SqliteBudgetRepository } from '@/database/repositories/budget.repository';
+import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
+import { formatMMK } from '@/lib/currency';
+import { formatMonth, periodForMonth } from '@/lib/date';
+import { colors } from '@/theme/colors';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import { useTransactionCategories } from '@/features/transactions';
+import type { BudgetProgress } from '@/types/common';
 
 export default function BudgetScreen(): React.JSX.Element {
   const router = useRouter();

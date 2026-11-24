@@ -1,7 +1,10 @@
-import type { SettingsRepository } from '../src/database/repositories/settings.repository';
-import { OnboardingService, recommendedDailyLimit } from '../src/features/onboarding/services/onboarding.service';
-import type { TransactionService } from '../src/features/transactions/services/transaction.service';
-import { PERSONAL_SAVINGS_CATEGORY_ID, settingKeys } from '../src/lib/constants';
+import type { SettingsRepository } from '@/database/repositories/settings.repository';
+import {
+  OnboardingService,
+  recommendedDailyLimit,
+} from '@/features/onboarding';
+import type { TransactionService } from '@/features/transactions';
+import { PERSONAL_SAVINGS_CATEGORY_ID, settingKeys } from '@/lib/constants';
 
 function createDependencies(): { settings: SettingsRepository; transactions: Pick<TransactionService, 'create'> } {
   return {

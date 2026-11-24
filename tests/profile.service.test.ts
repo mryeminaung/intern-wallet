@@ -1,6 +1,6 @@
-import type { SettingsRepository } from '../src/database/repositories/settings.repository';
-import { settingKeys } from '../src/lib/constants';
-import { ProfileService } from '../src/features/profile/services/profile.service';
+import type { SettingsRepository } from '@/database/repositories/settings.repository';
+import { settingKeys } from '@/lib/constants';
+import { ProfileService } from '@/features/profile';
 
 function repository(values: Partial<Record<string, string>> = {}): SettingsRepository {
   return {

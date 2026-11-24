@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { SettingsRepository } from '../../../database/repositories/settings.repository';
-import { settingKeys } from '../../../lib/constants';
+import type { SettingsRepository } from '@/database/repositories/settings.repository';
+import { settingKeys } from '@/lib/constants';
 
 const profileSchema = z.object({
   displayName: z.string().trim().min(1, 'Enter a display name.').max(40, 'Keep your name under 40 characters.'),

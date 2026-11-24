@@ -1,5 +1,5 @@
-import type { Migration } from '../schema';
-import { initialSchemaSql } from '../schema';
+import type { Migration } from '@/database/schema';
+import { initialSchemaSql } from '@/database/schema';
 
 export const initialMigration: Migration = {
   version: 1,

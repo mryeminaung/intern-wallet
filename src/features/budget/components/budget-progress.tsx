@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
-import { colors } from '../../../theme/colors';
-import { radii } from '../../../theme/spacing';
-import type { BudgetStatus } from '../../../types/common';
+import { colors } from '@/theme/colors';
+import { radii } from '@/theme/spacing';
+import type { BudgetStatus } from '@/types/common';
 
 type BudgetProgressProps = {
   percentage: number;

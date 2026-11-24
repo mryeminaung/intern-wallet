@@ -1,11 +1,11 @@
 import * as SQLite from 'expo-sqlite';
-import { DATABASE_NAME } from '../lib/constants';
-import { initialMigration } from './migrations/001_initial';
-import { budgetScopeIndexesMigration } from './migrations/002_budget_scope_indexes';
+import { DATABASE_NAME } from '@/lib/constants';
+import { initialMigration } from '@/database/migrations/001_initial';
+import { budgetScopeIndexesMigration } from '@/database/migrations/002_budget_scope_indexes';
 import { seedDefaultCategories } from './seed';
-import { setDisplayDateFormat } from '../lib/date';
-import { setCurrencyDisplay } from '../lib/currency';
-import { settingKeys } from '../lib/constants';
+import { setDisplayDateFormat } from '@/lib/date';
+import { setCurrencyDisplay } from '@/lib/currency';
+import { settingKeys } from '@/lib/constants';
 import type { Migration } from './schema';
 
 const migrations: readonly Migration[] = [initialMigration, budgetScopeIndexesMigration];

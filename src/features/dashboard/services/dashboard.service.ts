@@ -1,6 +1,6 @@
-import { daysBetween, formatMonth, monthPeriod } from '../../../lib/date';
-import type { AnalyticsRepository, CategorySpendingRow, RecentTransactionRow } from '../../../database/repositories/analytics.repository';
-import type { BudgetRepository } from '../../../database/repositories/budget.repository';
+import { daysBetween, formatMonth, monthPeriod } from '@/lib/date';
+import type { AnalyticsRepository, CategorySpendingRow, RecentTransactionRow } from '@/database/repositories/analytics.repository';
+import type { BudgetRepository } from '@/database/repositories/budget.repository';
 
 export type DashboardData = {
   balance: number;

@@ -3,20 +3,23 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react-native';
-import { Screen } from '../../src/components/shared/Screen';
-import { useReports } from '../../src/features/reports/hooks/use-reports';
-import { BudgetPerformance } from '../../src/features/reports/components/budget-performance';
-import { CategoryBreakdown } from '../../src/features/reports/components/category-breakdown';
-import { FinancialInsights } from '../../src/features/reports/components/financial-insights';
-import { IncomeSourceBreakdown } from '../../src/features/reports/components/income-source-breakdown';
-import { IncomeExpenseChart } from '../../src/features/reports/components/income-expense-chart';
-import { SpendingTrend } from '../../src/features/reports/components/spending-trend';
-import { endOfDayIso, formatDisplayDate, monthPeriod, startOfDayIso, weekPeriod, yearPeriod, type DatePeriod } from '../../src/lib/date';
-import { formatMMK } from '../../src/lib/currency';
-import { colors } from '../../src/theme/colors';
-import { fontFamily } from '../../src/theme/typography';
-import { radii, shadows, spacing } from '../../src/theme/spacing';
-import { useTransactionFilterStore } from '../../src/stores/transaction-filter.store';
+import { Screen } from '@/components/shared/Screen';
+import {
+  BudgetPerformance,
+  CategoryBreakdown,
+  FinancialInsights,
+  IncomeExpenseChart,
+  IncomeSourceBreakdown,
+  SpendingTrend,
+  useReports,
+} from '@/features/reports';
+
+import { endOfDayIso, formatDisplayDate, monthPeriod, startOfDayIso, weekPeriod, yearPeriod, type DatePeriod } from '@/lib/date';
+import { formatMMK } from '@/lib/currency';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { useTransactionFilterStore } from '@/stores/transaction-filter.store';
 
 type PeriodMode = 'month' | 'week' | 'year' | 'custom';
 type PickerMode = 'from' | 'to' | null;
@@ -71,12 +74,12 @@ export default function ReportsScreen(): React.JSX.Element {
     {data ? <>
       <View style={styles.summaryGrid}><Summary icon={ArrowUpRight} label="Total income" value={data.totalIncome} color={colors.income} background="#E5F4EB" /><Summary icon={ArrowDownLeft} label="Total expenses" value={data.totalExpenses} color={colors.expense} background="#FDECEC" /></View>
       <View style={[styles.netCard, data.netSavings < 0 && styles.netCardNegative]}><View><Text style={styles.netLabel}>NET SAVINGS</Text><Text adjustsFontSizeToFit minimumFontScale={0.72} numberOfLines={1} style={styles.netValue}>{formatMMK(data.netSavings)}</Text><Text style={styles.netCaption}>Income minus expenses</Text></View><View style={styles.rate}><Text style={styles.rateLabel}>Savings rate</Text><Text style={styles.rateValue}>{data.savingsRate === null ? '—' : `${Math.round(data.savingsRate)}%`}</Text></View></View>
+      <FinancialInsights insights={data.insights} />
       <IncomeExpenseChart months={data.monthlySpending} />
       <SpendingTrend points={data.dailySpending} />
       <CategoryBreakdown categories={data.categories} totalExpenses={data.totalExpenses} />
       <IncomeSourceBreakdown sources={data.incomeSources} onPressSource={(categoryId) => { setTransactionType('income'); setTransactionCategory(categoryId); router.push('/transactions'); }} />
       <BudgetPerformance budget={data.budget} onOpenBudget={() => router.push('/budget')} />
-      <FinancialInsights insights={data.insights} />
     </> : null}
   </ScrollView></Screen>;
 }

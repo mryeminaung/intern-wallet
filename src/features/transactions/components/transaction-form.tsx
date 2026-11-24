@@ -6,23 +6,25 @@ import { CalendarDays, ChevronDown } from 'lucide-react-native';
 import {
   ActivityIndicator,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
-import { KeyboardAwareScrollView } from '../../../components/shared/KeyboardAwareScrollView';
-import { KeyboardDoneAccessory } from '../../../components/shared/KeyboardDoneAccessory';
-import { formatDisplayDate } from '../../../lib/date';
-import { colors } from '../../../theme/colors';
-import { radii, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
-import type { Category, TransactionType } from '../../../types/common';
+import { KeyboardDoneAccessory } from '@/components/shared/KeyboardDoneAccessory';
+import { formatDisplayDate } from '@/lib/date';
+import { colors } from '@/theme/colors';
+import { radii, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { Category, TransactionType } from '@/types/common';
 import {
   transactionFormSchema,
   type TransactionFormValues,
-} from '../schemas/transaction.schema';
+} from '@/features/transactions/schemas/transaction.schema';
 import { CategorySelector } from './category-selector';
 
 type TransactionFormProps = {
@@ -99,7 +101,8 @@ export function TransactionForm({
   };
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.form}>
+      <ScrollView contentContainerStyle={styles.content} keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} style={styles.scroll}>
         <Text style={styles.label}>Type</Text>
         <Controller
           control={control}
@@ -201,8 +204,9 @@ export function TransactionForm({
         />
         {errors.note ? <Text style={styles.errorText}>{errors.note.message}</Text> : null}
 
+      </ScrollView>
+      <View style={styles.footer}>
         {error ? <Text style={[styles.errorText, styles.formError]}>{error}</Text> : null}
-
         <Pressable
           accessibilityRole="button"
           disabled={submitting}
@@ -211,13 +215,17 @@ export function TransactionForm({
         >
           {submitting ? <ActivityIndicator color={colors.white} /> : <Text style={styles.submitText}>{submitLabel}</Text>}
         </Pressable>
+      </View>
       <KeyboardDoneAccessory nativeID={TRANSACTION_KEYBOARD_ACCESSORY_ID} />
-    </KeyboardAwareScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  form: { flex: 1 },
+  scroll: { flex: 1 },
+  content: { padding: spacing.lg, paddingBottom: spacing.md },
+  footer: { backgroundColor: colors.background, borderTopColor: colors.border, borderTopWidth: StyleSheet.hairlineWidth, paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.sm },
   label: { color: colors.text, fontFamily: fontFamily.medium, fontSize: 14, marginBottom: spacing.sm, marginTop: spacing.md },
   segmentedControl: { backgroundColor: colors.forestSoft, borderRadius: radii.md, flexDirection: 'row', padding: spacing.xs },
   segment: { alignItems: 'center', borderRadius: radii.sm, flex: 1, paddingVertical: spacing.md },
@@ -233,7 +241,7 @@ const styles = StyleSheet.create({
   noteInput: { minHeight: 96, textAlignVertical: 'top' },
   errorText: { color: colors.expense, fontFamily: fontFamily.regular, fontSize: 13, marginTop: spacing.xs },
   formError: { backgroundColor: '#FCEDEA', borderRadius: radii.sm, padding: spacing.sm },
-  submitButton: { alignItems: 'center', backgroundColor: colors.forest, borderRadius: radii.md, marginTop: spacing.xl, minHeight: 54, justifyContent: 'center' },
+  submitButton: { alignItems: 'center', backgroundColor: colors.forest, borderRadius: radii.md, minHeight: 54, justifyContent: 'center' },
   submitButtonDisabled: { opacity: 0.65 },
   submitText: { color: colors.white, fontFamily: fontFamily.semiBold, fontSize: 16 },
 });

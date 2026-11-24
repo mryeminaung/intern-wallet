@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useUiStore } from '../../stores/ui.store';
-import { colors } from '../../theme/colors';
-import { fontFamily } from '../../theme/typography';
-import { radii, shadows, spacing } from '../../theme/spacing';
+import { useUiStore } from '@/stores/ui.store';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, shadows, spacing } from '@/theme/spacing';
 
 export function ToastBanner(): React.JSX.Element | null {
   const insets = useSafeAreaInsets();

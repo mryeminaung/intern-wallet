@@ -1,7 +1,7 @@
-import { calendarDaysInclusive } from '../../../lib/date';
-import { PERSONAL_SAVINGS_CATEGORY_ID, settingKeys } from '../../../lib/constants';
-import type { SettingsRepository } from '../../../database/repositories/settings.repository';
-import type { TransactionService } from '../../transactions/services/transaction.service';
+import { calendarDaysInclusive } from '@/lib/date';
+import { PERSONAL_SAVINGS_CATEGORY_ID, settingKeys } from '@/lib/constants';
+import type { SettingsRepository } from '@/database/repositories/settings.repository';
+import type { TransactionService } from '@/features/transactions';
 
 export type OnboardingInput = {
   internshipStartDate: string;

@@ -3,20 +3,23 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react-native';
 import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Screen } from '../../src/components/shared/Screen';
-import { KeyboardDoneAccessory } from '../../src/components/shared/KeyboardDoneAccessory';
-import { TransactionFilter } from '../../src/features/transactions/components/transaction-filter';
-import { TransactionList } from '../../src/features/transactions/components/transaction-list';
-import { useTransactionCategories } from '../../src/features/transactions/hooks/use-transaction-categories';
-import { useTransactionSummary } from '../../src/features/transactions/hooks/use-transaction-summary';
-import { useTransactions } from '../../src/features/transactions/hooks/use-transactions';
-import { endOfDayIso, formatDisplayDate, formatMonth, periodForMonth, startOfDayIso } from '../../src/lib/date';
-import { formatMMK } from '../../src/lib/currency';
-import { useTransactionFilterStore } from '../../src/stores/transaction-filter.store';
-import { colors } from '../../src/theme/colors';
-import { fontFamily } from '../../src/theme/typography';
-import { radii, shadows, spacing } from '../../src/theme/spacing';
-import type { TransactionSort } from '../../src/database/repositories/transaction.repository';
+import { Screen } from '@/components/shared/Screen';
+import { KeyboardDoneAccessory } from '@/components/shared/KeyboardDoneAccessory';
+import {
+  TransactionFilter,
+  TransactionList,
+  useTransactionCategories,
+  useTransactions,
+  useTransactionSummary,
+} from '@/features/transactions';
+
+import { endOfDayIso, formatDisplayDate, formatMonth, periodForMonth, startOfDayIso } from '@/lib/date';
+import { formatMMK } from '@/lib/currency';
+import { useTransactionFilterStore } from '@/stores/transaction-filter.store';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import type { TransactionSort } from '@/database/repositories/transaction.repository';
 
 type FilterDate = 'from' | 'to' | null;
 const FILTER_KEYBOARD_ACCESSORY_ID = 'transaction-filter-keyboard';
@@ -100,7 +103,7 @@ export default function TransactionsScreen(): React.JSX.Element {
       {summaryLoading ? <ActivityIndicator color={colors.forest} size="small" style={styles.summaryLoading} /> : null}
       {summaryError ? <Text style={styles.summaryError}>{summaryError}</Text> : null}
 
-      <View style={styles.filterHeading}><Text style={styles.sectionTitle}>Activity</Text>{hasFilters ? <Pressable accessibilityRole="button" onPress={clearFilters}><Text style={styles.clearText}>Clear all</Text></Pressable> : null}</View>
+      <View style={styles.filterHeading}><Text style={styles.sectionTitle}>Transactions</Text>{hasFilters ? <Pressable accessibilityRole="button" onPress={clearFilters}><Text style={styles.clearText}>Clear all</Text></Pressable> : null}</View>
       <TransactionFilter advancedActive={hasAdvancedFilters} onAdvancedPress={() => setAdvancedOpen(true)} onSearchChange={setSearch} onTypeChange={setType} search={search} type={type} />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}

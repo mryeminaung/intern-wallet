@@ -1,9 +1,9 @@
 import { Check } from 'lucide-react-native';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../../../theme/colors';
-import { radii, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
-import type { Category, TransactionType } from '../../../types/common';
+import { colors } from '@/theme/colors';
+import { radii, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { Category, TransactionType } from '@/types/common';
 
 type CategorySelectorProps = {
   categories: readonly Category[];

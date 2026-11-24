@@ -4,13 +4,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { CalendarDays } from 'lucide-react-native';
 import { ActivityIndicator, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { KeyboardDoneAccessory } from '../../../components/shared/KeyboardDoneAccessory';
-import { formatMonth } from '../../../lib/date';
-import { colors } from '../../../theme/colors';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
-import type { Category } from '../../../types/common';
-import { budgetFormSchema, type BudgetFormValues } from '../schemas/budget.schema';
+import { KeyboardDoneAccessory } from '@/components/shared/KeyboardDoneAccessory';
+import { formatMonth } from '@/lib/date';
+import { colors } from '@/theme/colors';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { Category } from '@/types/common';
+import {
+  budgetFormSchema,
+  type BudgetFormValues,
+} from '@/features/budget/schemas/budget.schema';
 
 const BUDGET_KEYBOARD_ACCESSORY_ID = 'budget-form-keyboard';
 

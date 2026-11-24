@@ -1,10 +1,10 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { WalletData } from '../../types/common';
+import type { WalletData } from '@/types/common';
 import { SqliteCategoryRepository } from './category.repository';
 import { SqliteTransactionRepository } from './transaction.repository';
 import { SqliteBudgetRepository } from './budget.repository';
 import { SqliteSettingsRepository } from './settings.repository';
-import { seedDefaultCategories } from '../seed';
+import { seedDefaultCategories } from '@/database/seed';
 
 export class DataManagementRepository {
   public constructor(private readonly database: SQLiteDatabase) {}

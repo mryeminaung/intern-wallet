@@ -1,7 +1,10 @@
-import type { AnalyticsRepository } from '../src/database/repositories/analytics.repository';
-import type { BudgetRepository } from '../src/database/repositories/budget.repository';
-import type { CategoryRepository } from '../src/database/repositories/category.repository';
-import { BudgetService, getBudgetStatus } from '../src/features/budget/services/budget.service';
+import type { AnalyticsRepository } from '@/database/repositories/analytics.repository';
+import type { BudgetRepository } from '@/database/repositories/budget.repository';
+import type { CategoryRepository } from '@/database/repositories/category.repository';
+import {
+  BudgetService,
+  getBudgetStatus,
+} from '@/features/budget';
 
 describe('BudgetService', () => {
   it('uses expense transactions only and marks an exceeded overall budget', async () => {

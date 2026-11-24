@@ -1,9 +1,9 @@
 import { WalletCards } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
-import { formatMMK } from '../../../lib/currency';
-import { colors } from '../../../theme/colors';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
+import { formatMMK } from '@/lib/currency';
+import { colors } from '@/theme/colors';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
 
 type BalanceCardProps = {
   balance: number;

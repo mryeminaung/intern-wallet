@@ -1,6 +1,6 @@
 import { randomUUID } from 'expo-crypto';
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Budget, CreateBudgetInput } from '../../types/common';
+import type { Budget, CreateBudgetInput } from '@/types/common';
 
 type BudgetRow = {
   id: string;

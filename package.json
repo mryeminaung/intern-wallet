@@ -36,6 +36,7 @@
     "zustand": "^5.0.16"
   },
   "devDependencies": {
+    "@expo/ngrok": "^4.1.0",
     "@react-native/jest-preset": "^0.88.1",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.3.0",
@@ -51,7 +52,10 @@
     "test": "jest --runInBand"
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    }
   },
   "private": true
 }

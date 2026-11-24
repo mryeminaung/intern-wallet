@@ -1,11 +1,11 @@
 import { ArrowRight, Target } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { formatMMK } from '../../../lib/currency';
-import { colors } from '../../../theme/colors';
-import { fontFamily } from '../../../theme/typography';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import type { ReportBudget } from '../services/reports.service';
-import { BudgetProgress } from '../../budget/components/budget-progress';
+import { formatMMK } from '@/lib/currency';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import type { ReportBudget } from '@/features/reports/services/reports.service';
+import { BudgetProgress } from '@/features/budget';
 
 const statusLabels = {
   normal: 'Within budget',

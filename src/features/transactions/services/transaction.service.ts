@@ -1,11 +1,11 @@
-import { isValidDateString } from '../../../lib/date';
-import type { CategoryRepository } from '../../../database/repositories/category.repository';
-import type { TransactionRepository } from '../../../database/repositories/transaction.repository';
+import { isValidDateString } from '@/lib/date';
+import type { CategoryRepository } from '@/database/repositories/category.repository';
+import type { TransactionRepository } from '@/database/repositories/transaction.repository';
 import type {
   CreateTransactionInput,
   Transaction,
   UpdateTransactionInput,
-} from '../../../types/common';
+} from '@/types/common';
 
 export class TransactionServiceError extends Error {
   public constructor(message: string) {

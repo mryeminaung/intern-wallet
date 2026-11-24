@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { SqliteTransactionRepository, type TransactionFilter } from '../../../database/repositories/transaction.repository';
-import type { Transaction } from '../../../types/common';
+import { SqliteTransactionRepository, type TransactionFilter } from '@/database/repositories/transaction.repository';
+import type { Transaction } from '@/types/common';
 
 export function useTransactions(filters: TransactionFilter): {
   transactions: readonly Transaction[];

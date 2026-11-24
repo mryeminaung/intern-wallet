@@ -1,10 +1,10 @@
 import { CalendarDays, TrendingUp } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
-import { formatMMK } from '../../../lib/currency';
-import { colors } from '../../../theme/colors';
-import { fontFamily } from '../../../theme/typography';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import type { DailyBudgetSummary } from '../../budget/services/daily-budget.service';
+import { formatMMK } from '@/lib/currency';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import type { DailyBudgetSummary } from '@/features/budget';
 
 export function InternshipOverview({ data }: { data: DailyBudgetSummary }): React.JSX.Element {
   const configured = data.completedDays !== null && data.remainingDays !== null;

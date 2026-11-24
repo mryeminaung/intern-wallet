@@ -3,16 +3,21 @@ import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, Vi
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ArrowLeft, ImagePlus, Trash2 } from 'lucide-react-native';
-import { Screen } from '../src/components/shared/Screen';
-import { KeyboardAwareScrollView } from '../src/components/shared/KeyboardAwareScrollView';
-import { SqliteSettingsRepository } from '../src/database/repositories/settings.repository';
-import { ProfileAvatar } from '../src/features/profile/components/profile-avatar';
-import { chooseProfileImage, deleteOwnedProfileImage, persistProfileImage } from '../src/features/profile/services/profile-image.service';
-import { ProfileService } from '../src/features/profile/services/profile.service';
-import { useUiStore } from '../src/stores/ui.store';
-import { colors } from '../src/theme/colors';
-import { fontFamily } from '../src/theme/typography';
-import { radii, shadows, spacing } from '../src/theme/spacing';
+import { Screen } from '@/components/shared/Screen';
+import { KeyboardAwareScrollView } from '@/components/shared/KeyboardAwareScrollView';
+import { SqliteSettingsRepository } from '@/database/repositories/settings.repository';
+import {
+  chooseProfileImage,
+  deleteOwnedProfileImage,
+  persistProfileImage,
+  ProfileAvatar,
+  ProfileService,
+} from '@/features/profile';
+
+import { useUiStore } from '@/stores/ui.store';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, shadows, spacing } from '@/theme/spacing';
 
 export default function ProfileScreen(): React.JSX.Element {
   const router = useRouter();

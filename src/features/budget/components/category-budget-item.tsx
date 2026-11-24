@@ -1,4 +1,4 @@
-import type { BudgetProgress } from '../../../types/common';
+import type { BudgetProgress } from '@/types/common';
 import { BudgetCard } from './budget-card';
 
 type CategoryBudgetItemProps = {

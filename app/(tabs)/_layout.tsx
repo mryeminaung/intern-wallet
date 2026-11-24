@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { FloatingTabBar } from '../../src/components/shared/FloatingTabBar';
+import { FloatingTabBar } from '@/components/shared/FloatingTabBar';
 
 export default function TabsLayout(): React.JSX.Element {
   return (

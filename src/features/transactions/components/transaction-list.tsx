@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { formatDisplayDate, dateKey } from '../../../lib/date';
-import { colors } from '../../../theme/colors';
-import { spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
-import type { Category, Transaction } from '../../../types/common';
+import { formatDisplayDate, dateKey } from '@/lib/date';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { Category, Transaction } from '@/types/common';
 import { TransactionListItem } from './transaction-item';
 
 type TransactionListProps = {

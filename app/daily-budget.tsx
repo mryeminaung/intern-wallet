@@ -4,15 +4,15 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { ArrowLeft, CalendarDays } from 'lucide-react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useRouter } from 'expo-router';
-import { Screen } from '../src/components/shared/Screen';
-import { KeyboardAwareScrollView } from '../src/components/shared/KeyboardAwareScrollView';
-import { KeyboardDoneAccessory } from '../src/components/shared/KeyboardDoneAccessory';
-import { SqliteSettingsRepository } from '../src/database/repositories/settings.repository';
-import { settingKeys } from '../src/lib/constants';
-import { formatDisplayDate, startOfDayIso } from '../src/lib/date';
-import { colors } from '../src/theme/colors';
-import { fontFamily } from '../src/theme/typography';
-import { radii, spacing } from '../src/theme/spacing';
+import { Screen } from '@/components/shared/Screen';
+import { KeyboardAwareScrollView } from '@/components/shared/KeyboardAwareScrollView';
+import { KeyboardDoneAccessory } from '@/components/shared/KeyboardDoneAccessory';
+import { SqliteSettingsRepository } from '@/database/repositories/settings.repository';
+import { settingKeys } from '@/lib/constants';
+import { formatDisplayDate, startOfDayIso } from '@/lib/date';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, spacing } from '@/theme/spacing';
 
 const DAILY_BUDGET_KEYBOARD_ACCESSORY_ID = 'daily-budget-keyboard';
 

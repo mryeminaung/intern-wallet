@@ -2,13 +2,16 @@ import Constants from 'expo-constants';
 import { ArrowDownLeft, ArrowLeft, ChevronRight, CloudOff, Database, Info, Palette, ShieldCheck, Tags, WalletCards, type LucideIcon } from 'lucide-react-native';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Screen } from '../src/components/shared/Screen';
-import { ProfileAvatar } from '../src/features/profile/components/profile-avatar';
-import { useProfile } from '../src/features/profile/hooks/use-profile';
-import { colors } from '../src/theme/colors';
-import { fontFamily } from '../src/theme/typography';
-import { radii, shadows, spacing } from '../src/theme/spacing';
-import { useTransactionFilterStore } from '../src/stores/transaction-filter.store';
+import { Screen } from '@/components/shared/Screen';
+import {
+  ProfileAvatar,
+  useProfile,
+} from '@/features/profile';
+
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { useTransactionFilterStore } from '@/stores/transaction-filter.store';
 
 const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 

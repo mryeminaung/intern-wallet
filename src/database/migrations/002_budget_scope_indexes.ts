@@ -1,4 +1,4 @@
-import type { Migration } from '../schema';
+import type { Migration } from '@/database/schema';
 
 export const budgetScopeIndexesMigration: Migration = {
   version: 2,

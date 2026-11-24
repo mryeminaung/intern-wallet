@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { SqliteCategoryRepository } from '../src/database/repositories/category.repository';
+import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
 
 describe('SqliteCategoryRepository.listForTransactionEntry', () => {
   it('requests categories ordered by their latest matching transaction use', async () => {

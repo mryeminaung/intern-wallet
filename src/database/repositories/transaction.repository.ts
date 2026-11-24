@@ -1,12 +1,12 @@
 import { randomUUID } from 'expo-crypto';
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { toIsoDate } from '../../lib/date';
+import { toIsoDate } from '@/lib/date';
 import type {
   CreateTransactionInput,
   Transaction,
   TransactionType,
   UpdateTransactionInput,
-} from '../../types/common';
+} from '@/types/common';
 
 export type TransactionFilter = {
   type?: TransactionType;

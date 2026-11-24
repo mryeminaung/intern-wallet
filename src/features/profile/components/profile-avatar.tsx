@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { UserRound } from 'lucide-react-native';
-import { colors } from '../../../theme/colors';
-import { fontFamily } from '../../../theme/typography';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
 
 export function ProfileAvatar({ avatarUri, displayName, size }: { avatarUri: string | null; displayName: string; size: number }): React.JSX.Element {
   const [imageFailed, setImageFailed] = useState(false);

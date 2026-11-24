@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { CategoryRepository } from '../../../database/repositories/category.repository';
-import type { Category } from '../../../types/common';
+import type { CategoryRepository } from '@/database/repositories/category.repository';
+import type { Category } from '@/types/common';
 
 const categoryInput = z.object({
   name: z.string().trim().min(1, 'Enter a category name.').max(40),

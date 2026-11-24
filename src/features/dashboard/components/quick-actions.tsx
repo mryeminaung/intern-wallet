@@ -1,8 +1,8 @@
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../../../theme/colors';
-import { radii, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
+import { colors } from '@/theme/colors';
+import { radii, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
 
 type QuickActionsProps = { onAddExpense: () => void; onAddIncome: () => void; };
 

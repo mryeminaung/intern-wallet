@@ -11,11 +11,11 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { NotoSansMyanmar_400Regular } from '@expo-google-fonts/noto-sans-myanmar';
-import { initializeDatabase } from '../src/database/client';
-import { SqliteSettingsRepository } from '../src/database/repositories/settings.repository';
-import { SqliteTransactionRepository } from '../src/database/repositories/transaction.repository';
-import { DATABASE_NAME, settingKeys } from '../src/lib/constants';
-import { ToastBanner } from '../src/components/shared/ToastBanner';
+import { initializeDatabase } from '@/database/client';
+import { SqliteSettingsRepository } from '@/database/repositories/settings.repository';
+import { SqliteTransactionRepository } from '@/database/repositories/transaction.repository';
+import { DATABASE_NAME, settingKeys } from '@/lib/constants';
+import { ToastBanner } from '@/components/shared/ToastBanner';
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 

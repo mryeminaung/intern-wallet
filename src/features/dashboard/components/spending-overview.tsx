@@ -1,12 +1,12 @@
 import { ArrowRight, Target } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { formatMMK } from '../../../lib/currency';
-import type { CategorySpendingRow } from '../../../database/repositories/analytics.repository';
-import { colors } from '../../../theme/colors';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
-import type { BudgetStatus } from '../../../types/common';
-import { BudgetProgress } from '../../budget/components/budget-progress';
+import { formatMMK } from '@/lib/currency';
+import type { CategorySpendingRow } from '@/database/repositories/analytics.repository';
+import { colors } from '@/theme/colors';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { BudgetStatus } from '@/types/common';
+import { BudgetProgress } from '@/features/budget';
 
 type SpendingOverviewProps = {
   spending: number;

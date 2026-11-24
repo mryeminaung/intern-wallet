@@ -1,10 +1,10 @@
 import { Pencil, Trash2 } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { formatMMK } from '../../../lib/currency';
-import { colors } from '../../../theme/colors';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
-import type { BudgetProgress } from '../../../types/common';
+import { formatMMK } from '@/lib/currency';
+import { colors } from '@/theme/colors';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { BudgetProgress } from '@/types/common';
 import { BudgetProgress as BudgetProgressBar } from './budget-progress';
 
 type BudgetCardProps = {

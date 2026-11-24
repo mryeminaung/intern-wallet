@@ -1,8 +1,12 @@
 import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { SqliteSettingsRepository } from '../../../database/repositories/settings.repository';
-import { emptyProfile, ProfileService, type Profile } from '../services/profile.service';
+import { SqliteSettingsRepository } from '@/database/repositories/settings.repository';
+import {
+  emptyProfile,
+  type Profile,
+  ProfileService,
+} from '@/features/profile/services/profile.service';
 
 export function useProfile(): { profile: Profile; refresh: () => Promise<void> } {
   const database = useSQLiteContext();

@@ -1,10 +1,10 @@
 import { ArrowDownLeft, ArrowUpRight, ChevronRight } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { formatMMK } from '../../../lib/currency';
-import { colors } from '../../../theme/colors';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
-import type { Category, Transaction } from '../../../types/common';
+import { formatMMK } from '@/lib/currency';
+import { colors } from '@/theme/colors';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { Category, Transaction } from '@/types/common';
 
 type TransactionListItemProps = {
   transaction: Transaction;

@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { SqliteSettingsRepository } from '../src/database/repositories/settings.repository';
+import { SqliteSettingsRepository } from '@/database/repositories/settings.repository';
 
 describe('SqliteSettingsRepository.setMany', () => {
   it('saves settings inside one transaction using bound parameters', async () => {

@@ -1,6 +1,9 @@
-import type { AnalyticsRepository } from '../src/database/repositories/analytics.repository';
-import type { BudgetRepository } from '../src/database/repositories/budget.repository';
-import { reportPeriodForMonth, ReportsService } from '../src/features/reports/services/reports.service';
+import type { AnalyticsRepository } from '@/database/repositories/analytics.repository';
+import type { BudgetRepository } from '@/database/repositories/budget.repository';
+import {
+  reportPeriodForMonth,
+  ReportsService,
+} from '@/features/reports';
 
 describe('ReportsService', () => {
   it('calculates net savings, daily average, and category percentages from aggregates', async () => {

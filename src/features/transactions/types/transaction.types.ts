@@ -4,4 +4,4 @@ export type {
   Transaction,
   TransactionType,
   UpdateTransactionInput,
-} from '../../../types/common';
+} from '@/types/common';

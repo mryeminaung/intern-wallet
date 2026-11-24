@@ -3,17 +3,21 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { useSQLiteContext } from 'expo-sqlite';
-import { Screen } from '../../../src/components/shared/Screen';
-import { TransactionForm } from '../../../src/features/transactions/components/transaction-form';
-import { useTransactionCategories } from '../../../src/features/transactions/hooks/use-transaction-categories';
-import { formValuesToTransactionInput, type TransactionFormValues } from '../../../src/features/transactions/schemas/transaction.schema';
-import { TransactionService } from '../../../src/features/transactions/services/transaction.service';
-import { SqliteCategoryRepository } from '../../../src/database/repositories/category.repository';
-import { SqliteTransactionRepository } from '../../../src/database/repositories/transaction.repository';
-import { colors } from '../../../src/theme/colors';
-import { spacing } from '../../../src/theme/spacing';
-import { fontFamily } from '../../../src/theme/typography';
-import type { Transaction } from '../../../src/types/common';
+import { Screen } from '@/components/shared/Screen';
+import {
+  formValuesToTransactionInput,
+  TransactionForm,
+  type TransactionFormValues,
+  TransactionService,
+  useTransactionCategories,
+} from '@/features/transactions';
+
+import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
+import { SqliteTransactionRepository } from '@/database/repositories/transaction.repository';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
+import type { Transaction } from '@/types/common';
 
 export default function EditTransactionScreen(): React.JSX.Element {
   const router = useRouter();

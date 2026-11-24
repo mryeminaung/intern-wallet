@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { TransactionType } from '../types/common';
+import type { TransactionType } from '@/types/common';
 
 type DefaultCategory = {
   id: string;

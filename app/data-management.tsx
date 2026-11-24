@@ -3,14 +3,18 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ArrowLeft } from 'lucide-react-native';
-import { Screen } from '../src/components/shared/Screen';
-import { DataManagementRepository } from '../src/database/repositories/data-management.repository';
-import { pickBackupFile, shareDataFile } from '../src/features/data-management/services/data-file.service';
-import type { BackupPreview } from '../src/features/data-management/services/data-management.service';
-import { DataManagementService } from '../src/features/data-management/services/data-management.service';
-import { colors } from '../src/theme/colors';
-import { fontFamily } from '../src/theme/typography';
-import { radii, spacing } from '../src/theme/spacing';
+import { Screen } from '@/components/shared/Screen';
+import { DataManagementRepository } from '@/database/repositories/data-management.repository';
+import {
+  type BackupPreview,
+  DataManagementService,
+  pickBackupFile,
+  shareDataFile,
+} from '@/features/data-management';
+
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, spacing } from '@/theme/spacing';
 
 export default function DataManagementScreen(): React.JSX.Element {
   const router = useRouter();

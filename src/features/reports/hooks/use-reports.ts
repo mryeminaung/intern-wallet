@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { SqliteAnalyticsRepository } from '../../../database/repositories/analytics.repository';
-import { SqliteBudgetRepository } from '../../../database/repositories/budget.repository';
-import type { DatePeriod } from '../../../lib/date';
-import { ReportsService, type ReportsData } from '../services/reports.service';
+import { SqliteAnalyticsRepository } from '@/database/repositories/analytics.repository';
+import { SqliteBudgetRepository } from '@/database/repositories/budget.repository';
+import type { DatePeriod } from '@/lib/date';
+import {
+  type ReportsData,
+  ReportsService,
+} from '@/features/reports/services/reports.service';
 
 export function useReports(period: DatePeriod): { data: ReportsData | null; loading: boolean; error: string | null; refresh: () => Promise<void> } {
   const database = useSQLiteContext();

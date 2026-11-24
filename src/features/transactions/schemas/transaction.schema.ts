@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { isValidDateString } from '../../../lib/date';
-import type { CreateTransactionInput, Transaction, TransactionType } from '../../../types/common';
-import { transactionTypes } from '../../../types/common';
+import { isValidDateString } from '@/lib/date';
+import type { CreateTransactionInput, Transaction, TransactionType } from '@/types/common';
+import { transactionTypes } from '@/types/common';
 
 export const transactionFormSchema = z.object({
   type: z.enum(transactionTypes),

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { SqliteAnalyticsRepository, type PeriodTotals } from '../../../database/repositories/analytics.repository';
+import { SqliteAnalyticsRepository, type PeriodTotals } from '@/database/repositories/analytics.repository';
 
 export function useTransactionSummary(fromDate: string, toDate: string): {
   summary: PeriodTotals | null;

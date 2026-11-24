@@ -4,19 +4,22 @@ import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { CalendarDays, Check, ChevronLeft, ShieldCheck, Sparkles, WalletCards } from 'lucide-react-native';
 import { ActivityIndicator, Image, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Screen } from '../src/components/shared/Screen';
-import { KeyboardAwareScrollView } from '../src/components/shared/KeyboardAwareScrollView';
-import { KeyboardDoneAccessory } from '../src/components/shared/KeyboardDoneAccessory';
-import { SqliteCategoryRepository } from '../src/database/repositories/category.repository';
-import { SqliteSettingsRepository } from '../src/database/repositories/settings.repository';
-import { SqliteTransactionRepository } from '../src/database/repositories/transaction.repository';
-import { OnboardingService, recommendedDailyLimit } from '../src/features/onboarding/services/onboarding.service';
-import { TransactionService } from '../src/features/transactions/services/transaction.service';
-import { formatMMK } from '../src/lib/currency';
-import { calendarDaysInclusive, formatDisplayDate } from '../src/lib/date';
-import { colors } from '../src/theme/colors';
-import { radii, shadows, spacing } from '../src/theme/spacing';
-import { fontFamily } from '../src/theme/typography';
+import { Screen } from '@/components/shared/Screen';
+import { KeyboardAwareScrollView } from '@/components/shared/KeyboardAwareScrollView';
+import { KeyboardDoneAccessory } from '@/components/shared/KeyboardDoneAccessory';
+import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
+import { SqliteSettingsRepository } from '@/database/repositories/settings.repository';
+import { SqliteTransactionRepository } from '@/database/repositories/transaction.repository';
+import {
+  OnboardingService,
+  recommendedDailyLimit,
+} from '@/features/onboarding';
+import { TransactionService } from '@/features/transactions';
+import { formatMMK } from '@/lib/currency';
+import { calendarDaysInclusive, formatDisplayDate } from '@/lib/date';
+import { colors } from '@/theme/colors';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
 
 type PickerField = 'start' | 'end' | null;
 const ONBOARDING_KEYBOARD_ACCESSORY_ID = 'onboarding-keyboard';

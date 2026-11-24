@@ -1,6 +1,6 @@
-import type { AnalyticsRepository } from '../src/database/repositories/analytics.repository';
-import type { BudgetRepository } from '../src/database/repositories/budget.repository';
-import { DashboardService } from '../src/features/dashboard/services/dashboard.service';
+import type { AnalyticsRepository } from '@/database/repositories/analytics.repository';
+import type { BudgetRepository } from '@/database/repositories/budget.repository';
+import { DashboardService } from '@/features/dashboard';
 
 describe('DashboardService', () => {
   it('calculates all-time balance and current-month comparison', async () => {

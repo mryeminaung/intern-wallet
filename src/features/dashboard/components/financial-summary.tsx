@@ -1,9 +1,9 @@
 import { ArrowDownLeft, ArrowUpRight, type LucideIcon } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
-import { formatMMK } from '../../../lib/currency';
-import { colors } from '../../../theme/colors';
-import { radii, shadows, spacing } from '../../../theme/spacing';
-import { fontFamily } from '../../../theme/typography';
+import { formatMMK } from '@/lib/currency';
+import { colors } from '@/theme/colors';
+import { radii, shadows, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
 
 type FinancialSummaryProps = { income: number; expenses: number; };
 
@@ -20,6 +20,6 @@ const styles = StyleSheet.create({
   card: { backgroundColor: colors.surface, borderRadius: radii.md, flex: 1, minHeight: 104, padding: spacing.md, ...shadows.soft },
   cardHeader: { alignItems: 'center', flexDirection: 'row', gap: spacing.sm },
   icon: { alignItems: 'center', borderRadius: radii.sm, height: 32, justifyContent: 'center', width: 32 },
-  label: { color: colors.textMuted, flex: 1, fontFamily: fontFamily.medium, fontSize: 11, lineHeight: 15 },
+  label: { color: colors.textMuted, flex: 1, fontFamily: fontFamily.medium, fontSize: 12, lineHeight: 16 },
   value: { fontFamily: fontFamily.bold, fontSize: 15, fontVariant: ['tabular-nums'], marginTop: spacing.md },
 });

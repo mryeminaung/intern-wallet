@@ -1,4 +1,4 @@
-import { calendarDaysInclusive, dateKey, formatMonth, millisecondsUntilNextLocalDay } from '../src/lib/date';
+import { calendarDaysInclusive, dateKey, formatMonth, millisecondsUntilNextLocalDay } from '@/lib/date';
 
 describe('calendar calculations', () => {
   it('uses the device local calendar for month and day grouping', () => {

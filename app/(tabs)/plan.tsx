@@ -2,12 +2,12 @@ import { useCallback } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { CalendarDays, ChevronRight, History, Settings, Target } from 'lucide-react-native';
-import { Screen } from '../../src/components/shared/Screen';
-import { useDailyBudget } from '../../src/features/budget/hooks/use-daily-budget';
-import { formatMMK } from '../../src/lib/currency';
-import { colors } from '../../src/theme/colors';
-import { fontFamily } from '../../src/theme/typography';
-import { radii, shadows, spacing } from '../../src/theme/spacing';
+import { Screen } from '@/components/shared/Screen';
+import { useDailyBudget } from '@/features/budget';
+import { formatMMK } from '@/lib/currency';
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
+import { radii, shadows, spacing } from '@/theme/spacing';
 
 export default function PlanScreen(): React.JSX.Element {
   const router = useRouter();

@@ -8,7 +8,7 @@ export const colors = {
   text: '#0F172A',
   textMuted: '#64748B',
   border: '#E2E8F0',
-  income: '#059669',
+  income: '#047857',
   expense: '#DC2626',
   warning: '#D97706',
   white: '#FFFFFF',

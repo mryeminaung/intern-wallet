@@ -1,4 +1,8 @@
-import { formValuesToTransactionInput, transactionFormSchema, transactionToRepeatFormValues } from '../src/features/transactions/schemas/transaction.schema';
+import {
+  formValuesToTransactionInput,
+  transactionFormSchema,
+  transactionToRepeatFormValues,
+} from '@/features/transactions';
 
 describe('transaction form validation', () => {
   it('accepts a positive whole MMK amount and normalizes the note', () => {
