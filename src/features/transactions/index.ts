@@ -5,6 +5,7 @@ export * from './components/transaction-item';
 export * from './components/transaction-list';
 export * from './hooks/use-transaction-entry-categories';
 export * from './hooks/use-bank-names';
+export * from './hooks/use-preferred-money-sources';
 export * from './hooks/use-transaction-categories';
 export * from './hooks/use-transaction-summary';
 export * from './hooks/use-transactions';

@@ -15,6 +15,7 @@ import { colors } from '@/theme/colors';
 import { radii, spacing } from '@/theme/spacing';
 import { fontFamily } from '@/theme/typography';
 import type { Category, Transaction } from '@/types/common';
+import { checkBudgetAlerts } from '@/features/alerts/check-budget-alerts';
 
 export default function TransactionDetailsScreen(): React.JSX.Element {
   const router = useRouter();
@@ -76,6 +77,7 @@ export default function TransactionDetailsScreen(): React.JSX.Element {
         new SqliteTransactionRepository(database),
         new SqliteCategoryRepository(database),
       ).delete(id);
+      void checkBudgetAlerts(database).catch(() => undefined);
       router.replace('/transactions');
     } catch {
       setError('Transaction could not be deleted.');

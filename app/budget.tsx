@@ -4,6 +4,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowLeft, ChevronLeft, ChevronRight, Plus } from 'lucide-react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Screen } from '@/components/shared/Screen';
+import { WalletMascot } from '@/components/ui/WalletMascot';
+import { Decoration } from '@/components/ui/Decoration';
 import { KeyboardAwareScrollView } from '@/components/shared/KeyboardAwareScrollView';
 import {
   BudgetCard,
@@ -26,6 +28,7 @@ import { radii, shadows, spacing } from '@/theme/spacing';
 import { fontFamily } from '@/theme/typography';
 import { useTransactionCategories } from '@/features/transactions';
 import type { BudgetProgress } from '@/types/common';
+import { checkBudgetAlerts } from '@/features/alerts/check-budget-alerts';
 
 export default function BudgetScreen(): React.JSX.Element {
   const router = useRouter();
@@ -81,6 +84,7 @@ export default function BudgetScreen(): React.JSX.Element {
       } else {
         await service.create(input);
       }
+      void checkBudgetAlerts(database).catch(() => undefined);
       setFormOpen(false);
       setEditing(null);
       await refresh();
@@ -97,6 +101,7 @@ export default function BudgetScreen(): React.JSX.Element {
       { text: 'Delete', style: 'destructive', onPress: () => { void (async () => {
         try {
           await new BudgetService(new SqliteBudgetRepository(database), new SqliteCategoryRepository(database), new SqliteAnalyticsRepository(database)).delete(budget.id);
+          void checkBudgetAlerts(database).catch(() => undefined);
           await refresh();
         } catch (cause) {
           setFormError(cause instanceof Error ? cause.message : 'Budget could not be deleted.');
@@ -123,10 +128,11 @@ export default function BudgetScreen(): React.JSX.Element {
         </View>
 
         {summary ? <View style={styles.summaryCard}><Text style={styles.summaryLabel}>Monthly spending</Text><Text style={styles.summaryAmount}>{formatMMK(summary.totalSpent)}</Text><Text style={styles.summaryMeta}>{summary.totalBudget > 0 ? `${Math.round(summary.usagePercentage)}% of ${formatMMK(summary.totalBudget)}` : 'No monthly budget set yet'}</Text></View> : null}
+        {summary?.budgets.some((budget) => budget.status === 'exceeded') ? <View style={styles.warningBanner}><WalletMascot mood="warning" size={74} /><View style={styles.warningCopy}><Text style={styles.warningTitle}>A budget needs attention</Text><Text style={styles.warningText}>At least one limit is exceeded. Check the spending below and adjust your plan if needed.</Text></View></View> : null}
         {formOpen ? <BudgetForm categories={categories} error={formError} initialValues={editing ? { month: editing.month, amount: String(editing.amount), categoryId: editing.categoryId ?? '' } : { month }} isEditing={Boolean(editing)} onCancel={() => { setFormOpen(false); setEditing(null); }} onSubmit={handleSubmit} submitting={submitting} /> : null}
         {loading ? <Text style={styles.status}>Loading budgets…</Text> : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        {!loading && !formOpen && summary?.budgets.length === 0 ? <View style={styles.empty}><Text style={styles.emptyIcon}>🎯</Text><Text style={styles.emptyTitle}>No budgets for this month</Text><Text style={styles.emptyText}>Set an overall limit or a category limit to make your spending visible.</Text><Pressable onPress={openNew} style={styles.emptyButton}><Text style={styles.emptyButtonText}>Create a budget</Text></Pressable></View> : null}
+        {!loading && !formOpen && summary?.budgets.length === 0 ? <View style={styles.empty}><Decoration height={118} name="dot-pattern" style={styles.emptyDecoration} width={118} /><WalletMascot mood="welcome" size={100} /><Text style={styles.emptyTitle}>No budgets for this month</Text><Text style={styles.emptyText}>Set an overall limit or a category limit to make your spending visible.</Text><Pressable accessibilityRole="button" onPress={openNew} style={styles.emptyButton}><Text style={styles.emptyButtonText}>Create a budget</Text></Pressable></View> : null}
         {overall ? <View style={styles.section}><Text style={styles.sectionTitle}>Overall</Text><BudgetCard budget={overall} onDelete={() => deleteBudget(overall)} onEdit={() => openEdit(overall)} /></View> : null}
         {categoryBudgets.length > 0 ? <View style={styles.section}><Text style={styles.sectionTitle}>Category budgets</Text>{categoryBudgets.map((budget) => <CategoryBudgetItem budget={budget} key={budget.id} onDelete={() => deleteBudget(budget)} onEdit={() => openEdit(budget)} />)}</View> : null}
       </KeyboardAwareScrollView>
@@ -147,12 +153,16 @@ const styles = StyleSheet.create({
   summaryLabel: { color: colors.forestSoft, fontFamily: fontFamily.medium, fontSize: 13 },
   summaryAmount: { color: colors.white, fontFamily: fontFamily.bold, fontSize: 28, fontVariant: ['tabular-nums'], marginTop: spacing.xs },
   summaryMeta: { color: colors.forestSoft, fontFamily: fontFamily.regular, fontSize: 13, marginTop: spacing.sm },
+  warningBanner: { alignItems: 'center', backgroundColor: '#FFF3EC', borderRadius: radii.md, flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md, padding: spacing.sm },
+  warningCopy: { flex: 1 },
+  warningTitle: { color: colors.expense, fontFamily: fontFamily.semiBold, fontSize: 14 },
+  warningText: { color: colors.text, fontFamily: fontFamily.regular, fontSize: 12, lineHeight: 18, marginTop: spacing.xs },
   section: { gap: spacing.sm, marginTop: spacing.lg },
   sectionTitle: { color: colors.text, fontFamily: fontFamily.semiBold, fontSize: 16, marginBottom: spacing.xs },
   status: { color: colors.textMuted, fontFamily: fontFamily.regular, marginTop: spacing.lg },
   error: { backgroundColor: '#FCEDEA', borderRadius: radii.sm, color: colors.expense, fontFamily: fontFamily.regular, marginTop: spacing.md, padding: spacing.sm },
-  empty: { alignItems: 'center', backgroundColor: colors.surface, borderRadius: radii.md, marginTop: spacing.lg, padding: spacing.xl },
-  emptyIcon: { fontSize: 34 },
+  empty: { alignItems: 'center', backgroundColor: colors.surface, borderRadius: radii.md, marginTop: spacing.lg, overflow: 'hidden', padding: spacing.xl },
+  emptyDecoration: { opacity: 0.1, position: 'absolute', right: -48, top: -45 },
   emptyTitle: { color: colors.text, fontFamily: fontFamily.semiBold, fontSize: 17, marginTop: spacing.sm },
   emptyText: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 14, lineHeight: 21, marginTop: spacing.xs, textAlign: 'center' },
   emptyButton: { backgroundColor: colors.forest, borderRadius: radii.sm, marginTop: spacing.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },

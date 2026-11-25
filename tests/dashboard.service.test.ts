@@ -1,6 +1,6 @@
 import type { AnalyticsRepository } from '@/database/repositories/analytics.repository';
 import type { BudgetRepository } from '@/database/repositories/budget.repository';
-import { DashboardService } from '@/features/dashboard';
+import { DashboardService } from '@/features/dashboard/services/dashboard.service';
 
 describe('DashboardService', () => {
   it('calculates all-time balance and current-month comparison', async () => {
@@ -11,6 +11,7 @@ describe('DashboardService', () => {
         .mockResolvedValueOnce({ income: 20000, expenses: 8000 }),
       getCategorySpending: jest.fn().mockResolvedValue([{ categoryId: 'food', categoryName: 'Food', categoryIcon: '🍜', amount: 12000 }]),
       getRecentTransactions: jest.fn().mockResolvedValue([]),
+      getSourceBalances: jest.fn().mockResolvedValue([{ key: 'cash', balance: 60000 }]),
     } as unknown as AnalyticsRepository;
     const budgets = { list: jest.fn().mockResolvedValue([{ id: 'b1', month: '2026-11', categoryId: null, amount: 20000 }]) } as unknown as BudgetRepository;
     const dashboard = await new DashboardService(analytics, budgets).getDashboard(new Date(2026, 10, 15));
@@ -28,6 +29,7 @@ describe('DashboardService', () => {
       getTotals: jest.fn().mockResolvedValue({ income: 0, expenses: 0 }),
       getCategorySpending: jest.fn().mockResolvedValue([]),
       getRecentTransactions: jest.fn().mockResolvedValue([]),
+      getSourceBalances: jest.fn().mockResolvedValue([]),
     } as unknown as AnalyticsRepository;
     const budgets = { list: jest.fn().mockResolvedValue([]) } as unknown as BudgetRepository;
 
@@ -54,6 +56,7 @@ describe('DashboardService', () => {
         .mockResolvedValueOnce({ income: 40000, expenses: 30000 }),
       getCategorySpending: jest.fn().mockResolvedValue([]),
       getRecentTransactions: jest.fn().mockResolvedValue([]),
+      getSourceBalances: jest.fn().mockResolvedValue([{ key: 'cash', balance: 10000 }]),
     } as unknown as AnalyticsRepository;
     const budgets = { list: jest.fn().mockResolvedValue([{ id: 'b1', month: '2026-11', categoryId: null, amount: 20000 }]) } as unknown as BudgetRepository;
 
@@ -72,6 +75,7 @@ describe('DashboardService', () => {
         .mockResolvedValueOnce({ income: 10000, expenses: 0 }),
       getCategorySpending: jest.fn().mockResolvedValue([]),
       getRecentTransactions: jest.fn().mockResolvedValue([]),
+      getSourceBalances: jest.fn().mockResolvedValue([{ key: 'cash', balance: -10000 }]),
     } as unknown as AnalyticsRepository;
     const budgets = { list: jest.fn().mockResolvedValue([]) } as unknown as BudgetRepository;
 

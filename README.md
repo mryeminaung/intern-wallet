@@ -9,14 +9,16 @@ Intern Wallet is a simple personal finance app for interns. It helps track incom
 ## Features
 
 - Add, edit, repeat, search, filter, and sort income and expense transactions
+- See Cash, bank, and Unspecified balances, and move money between sources without changing income or expense totals
 - Organize transactions with built-in or custom income and expense categories
 - See balances, monthly summaries, recent activity, and internship progress at a glance
 - Set overall monthly budgets and category limits with live spending progress
+- Opt in to local alerts when daily, monthly, or category spending reaches 80% or 100% of a limit
 - Calculate a safe daily spending amount from the available balance and remaining internship days
 - Review daily spending history and see which days stayed within the daily limit
 - Explore reports for cash flow, spending trends, category breakdowns, income sources, budget performance, and financial insights
 - Personalize a local profile, currency display, and date format
-- Export transactions as CSV and create, preview, and restore validated JSON backups
+- Export transactions and transfers as CSV and create, preview, and restore validated JSON backups
 - Keep financial data private and available offline with on-device SQLite storage
 
 ## Tech Stack
@@ -35,6 +37,8 @@ npm start
 ```
 
 Use the Expo terminal menu to open the app on Android, iOS, or the web.
+
+Budget alerts use local device notifications after a recorded change. They require notification permission on Android or iOS; no account or server is needed.
 
 ### Test on an Android phone
 

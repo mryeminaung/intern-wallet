@@ -39,9 +39,23 @@ export type Setting = {
 export type WalletData = {
   categories: readonly Category[];
   transactions: readonly Transaction[];
+  transfers: readonly Transfer[];
   budgets: readonly Budget[];
   settings: readonly Setting[];
 };
+
+export type Transfer = {
+  id: string;
+  fromSourceKey: string;
+  toSourceKey: string;
+  amount: number;
+  note: string | null;
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateTransferInput = Pick<Transfer, 'fromSourceKey' | 'toSourceKey' | 'amount' | 'note' | 'date'>;
 
 export type CreateTransactionInput = {
   type: TransactionType;

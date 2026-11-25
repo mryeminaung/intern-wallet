@@ -15,4 +15,9 @@ export const settingKeys = {
   profileRole: 'profile_role',
   profileOrganization: 'profile_organization',
   profileAvatarUri: 'profile_avatar_uri',
+  alertDaily: 'alert_daily',
+  alertMonthly: 'alert_monthly',
+  alertCategory: 'alert_category',
+  alertAt80: 'alert_at_80',
+  alertAt100: 'alert_at_100',
 } as const;

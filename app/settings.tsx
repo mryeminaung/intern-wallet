@@ -4,6 +4,7 @@ import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import {
 	ArrowDownLeft,
+	Bell,
 	ArrowLeft,
 	ChevronRight,
 	CloudOff,
@@ -87,6 +88,7 @@ export default function SettingsScreen(): React.JSX.Element {
 				</Pressable>
 
 				<SettingsSection title="Manage your money">
+					<SettingsLink icon={Bell} label="Budget alerts" value="Choose daily and monthly notifications" onPress={() => router.push('/alerts')} />
 					<SettingsLink
 						icon={ArrowDownLeft}
 						label="Income history"

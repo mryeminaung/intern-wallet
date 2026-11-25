@@ -12,6 +12,7 @@ import {
   transactionToRepeatFormValues,
   useTransactionEntryCategories,
   useBankNames,
+  usePreferredMoneySources,
 } from '@/features/transactions';
 
 import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
@@ -20,6 +21,7 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fontFamily } from '@/theme/typography';
 import { useUiStore } from '@/stores/ui.store';
+import { checkBudgetAlerts } from '@/features/alerts/check-budget-alerts';
 import type { Transaction, TransactionType } from '@/types/common';
 
 export default function NewTransactionScreen(): React.JSX.Element {
@@ -28,6 +30,7 @@ export default function NewTransactionScreen(): React.JSX.Element {
   const database = useSQLiteContext();
   const { categories, recentCategoryIds, preferredCategoryIds, loading, error: categoryError } = useTransactionEntryCategories();
   const bankNames = useBankNames();
+  const { sources: preferredSources, loading: sourcesLoading } = usePreferredMoneySources();
   const showNotice = useUiStore((state) => state.showNotice);
   const repeatId = paramValue(params.repeatId);
   const requestedType: TransactionType = paramValue(params.type) === 'income' ? 'income' : 'expense';
@@ -65,8 +68,8 @@ export default function NewTransactionScreen(): React.JSX.Element {
       const values = transactionToRepeatFormValues(repeatTransaction);
       return repeatCategoryMissing ? { ...values, categoryId: '' } : values;
     }
-    return { type: requestedType, categoryId: preferredCategoryIds[requestedType] ?? '' };
-  }, [preferredCategoryIds, repeatCategoryMissing, repeatTransaction, requestedType]);
+    return { type: requestedType, categoryId: preferredCategoryIds[requestedType] ?? '', sourceType: preferredSources[requestedType].sourceType, bankName: preferredSources[requestedType].bankName ?? '' };
+  }, [preferredCategoryIds, preferredSources, repeatCategoryMissing, repeatTransaction, requestedType]);
 
   const handleSubmit = async (values: TransactionFormValues): Promise<void> => {
     setSubmitting(true);
@@ -77,6 +80,7 @@ export default function NewTransactionScreen(): React.JSX.Element {
         new SqliteCategoryRepository(database),
       );
       await service.create(formValuesToTransactionInput(values));
+      void checkBudgetAlerts(database).catch(() => undefined);
       showNotice(repeatTransaction ? 'Transaction repeated' : values.type === 'income' ? 'Income saved' : 'Expense saved');
       router.replace('/transactions');
     } catch (cause) {
@@ -100,7 +104,7 @@ export default function NewTransactionScreen(): React.JSX.Element {
       {categoryError ? <Text style={styles.error}>{categoryError}</Text> : null}
       {repeatError ? <Text style={styles.error}>{repeatError}</Text> : null}
       {repeatCategoryMissing ? <Text style={styles.warning}>The original category is no longer available. Choose another category before saving.</Text> : null}
-      {!loading && !repeatLoading && !repeatError && !categoryError ? <TransactionForm autoFocusAmount={!repeatTransaction} bankNames={bankNames} categories={categories} error={error} initialValues={initialValues} onSubmit={handleSubmit} preferredCategoryIds={preferredCategoryIds} recentCategoryIds={recentCategoryIds} submitLabel={repeatTransaction ? 'Save repeated transaction' : 'Save transaction'} submitting={submitting} /> : null}
+      {!loading && !sourcesLoading && !repeatLoading && !repeatError && !categoryError ? <TransactionForm autoFocusAmount={!repeatTransaction} bankNames={bankNames} categories={categories} error={error} initialValues={initialValues} onSubmit={handleSubmit} preferredCategoryIds={preferredCategoryIds} preferredSources={preferredSources} recentCategoryIds={recentCategoryIds} submitLabel={repeatTransaction ? 'Save repeated transaction' : 'Save transaction'} submitting={submitting} /> : null}
     </Screen>
   );
 }

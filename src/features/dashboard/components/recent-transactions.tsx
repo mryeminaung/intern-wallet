@@ -1,5 +1,6 @@
 import { ChevronRight } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { WalletMascot } from '@/components/ui/WalletMascot';
 import { formatMMK } from '@/lib/currency';
 import { formatDisplayDate } from '@/lib/date';
 import { moneySourceLabel } from '@/lib/money-source';
@@ -18,7 +19,7 @@ type RecentTransactionsProps = {
 export function RecentTransactions({ transactions, onTransactionPress, onViewAll, onAddTransaction }: RecentTransactionsProps): React.JSX.Element {
   return <View style={styles.wrap}>
     <View style={styles.header}><Text style={styles.title}>Recent activity</Text><Pressable accessibilityRole="button" onPress={onViewAll} style={styles.viewAllButton}><Text style={styles.viewAll}>See all</Text><ChevronRight color={colors.forest} size={16} /></Pressable></View>
-    {transactions.length === 0 ? <View style={styles.empty}><Text style={styles.emptyTitle}>No transactions yet</Text><Text style={styles.emptyText}>Your latest income and expenses will appear here.</Text><Pressable accessibilityRole="button" onPress={onAddTransaction} style={styles.emptyButton}><Text style={styles.emptyButtonText}>Add a transaction</Text></Pressable></View> : <View style={styles.list}>{transactions.map((transaction, index) => <Pressable accessibilityRole="button" key={transaction.id} onPress={() => onTransactionPress(transaction.id)} style={({ pressed }) => [styles.row, index < transactions.length - 1 && styles.rowDivider, pressed && styles.pressed]}><View style={[styles.icon, transaction.type === 'income' ? styles.incomeIcon : styles.expenseIcon]}><Text style={styles.iconText}>{transaction.categoryIcon}</Text></View><View style={styles.main}><Text numberOfLines={1} style={styles.category}>{transaction.categoryName}</Text><Text numberOfLines={1} style={styles.note}>{moneySourceLabel(transaction.sourceType, transaction.bankName)} · {transaction.note || formatDisplayDate(transaction.date)}</Text></View><View style={styles.amountWrap}><Text adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1} style={[styles.amount, { color: transaction.type === 'income' ? colors.income : colors.expense }]}>{transaction.type === 'income' ? '+' : '-'}{formatMMK(transaction.amount)}</Text></View><ChevronRight color={colors.textMuted} size={16} /></Pressable>)}</View>}
+    {transactions.length === 0 ? <View style={styles.empty}><WalletMascot mood="coin" size={92} /><Text style={styles.emptyTitle}>No transactions yet</Text><Text style={styles.emptyText}>Your latest income and expenses will appear here.</Text><Pressable accessibilityRole="button" onPress={onAddTransaction} style={styles.emptyButton}><Text style={styles.emptyButtonText}>Add a transaction</Text></Pressable></View> : <View style={styles.list}>{transactions.map((transaction, index) => <Pressable accessibilityRole="button" key={transaction.id} onPress={() => onTransactionPress(transaction.id)} style={({ pressed }) => [styles.row, index < transactions.length - 1 && styles.rowDivider, pressed && styles.pressed]}><View style={[styles.icon, transaction.type === 'income' ? styles.incomeIcon : styles.expenseIcon]}><Text style={styles.iconText}>{transaction.categoryIcon}</Text></View><View style={styles.main}><Text numberOfLines={1} style={styles.category}>{transaction.categoryName}</Text><Text numberOfLines={1} style={styles.note}>{moneySourceLabel(transaction.sourceType, transaction.bankName)} · {transaction.note || formatDisplayDate(transaction.date)}</Text></View><View style={styles.amountWrap}><Text adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1} style={[styles.amount, { color: transaction.type === 'income' ? colors.income : colors.expense }]}>{transaction.type === 'income' ? '+' : '-'}{formatMMK(transaction.amount)}</Text></View><ChevronRight color={colors.textMuted} size={16} /></Pressable>)}</View>}
   </View>;
 }
 
@@ -28,10 +29,10 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontFamily: fontFamily.semiBold, fontSize: 17 },
   viewAllButton: { alignItems: 'center', flexDirection: 'row', minHeight: 48 },
   viewAll: { color: colors.forest, fontFamily: fontFamily.semiBold, fontSize: 13 },
-  empty: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.md, borderWidth: 1, padding: spacing.md },
-  emptyTitle: { color: colors.text, fontFamily: fontFamily.semiBold, fontSize: 15 },
-  emptyText: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 13, lineHeight: 19, marginTop: spacing.xs },
-  emptyButton: { alignSelf: 'flex-start', backgroundColor: colors.forest, borderRadius: radii.sm, justifyContent: 'center', marginTop: spacing.md, minHeight: 48, paddingHorizontal: spacing.md },
+  empty: { alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.md, borderWidth: 1, padding: spacing.md },
+  emptyTitle: { color: colors.text, fontFamily: fontFamily.semiBold, fontSize: 15, marginTop: spacing.xs },
+  emptyText: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 13, lineHeight: 19, marginTop: spacing.xs, textAlign: 'center' },
+  emptyButton: { backgroundColor: colors.forest, borderRadius: radii.sm, justifyContent: 'center', marginTop: spacing.md, minHeight: 48, paddingHorizontal: spacing.md },
   emptyButtonText: { color: colors.white, fontFamily: fontFamily.semiBold, fontSize: 12 },
   list: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.md, borderWidth: 1, paddingHorizontal: spacing.md },
   row: { alignItems: 'center', flexDirection: 'row', gap: spacing.sm, minHeight: 66, paddingVertical: spacing.sm },

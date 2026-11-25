@@ -4,6 +4,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { Screen } from '@/components/shared/Screen';
+import { WalletMascot } from '@/components/ui/WalletMascot';
+import { Decoration } from '@/components/ui/Decoration';
 import {
   BudgetPerformance,
   CategoryBreakdown,
@@ -75,6 +77,7 @@ export default function ReportsScreen(): React.JSX.Element {
     {data ? <>
       <View style={styles.summaryGrid}><Summary icon={ArrowUpRight} label="Total income" value={data.totalIncome} color={colors.income} background="#E5F4EB" /><Summary icon={ArrowDownLeft} label="Total expenses" value={data.totalExpenses} color={colors.expense} background="#FDECEC" /></View>
       <View style={[styles.netCard, data.netSavings < 0 && styles.netCardNegative]}><View><Text style={styles.netLabel}>NET SAVINGS</Text><Text adjustsFontSizeToFit minimumFontScale={0.72} numberOfLines={1} style={styles.netValue}>{formatMMK(data.netSavings)}</Text><Text style={styles.netCaption}>Income minus expenses</Text></View><View style={styles.rate}><Text style={styles.rateLabel}>Savings rate</Text><Text style={styles.rateValue}>{data.savingsRate === null ? '—' : `${Math.round(data.savingsRate)}%`}</Text></View></View>
+      {data.totalIncome > 0 && data.netSavings > 0 ? <View style={styles.savingsMoment}><WalletMascot mood={periodOffset === 0 && mode !== 'custom' ? 'jump' : 'trophy'} size={74} /><View style={styles.savingsCopy}><Text style={styles.savingsTitle}>Income is ahead of spending</Text><Text style={styles.savingsText}>You kept more than you spent in the selected period.</Text></View><Decoration height={18} name="sparkle" style={styles.savingsSparkle} width={18} /></View> : null}
       <FinancialInsights insights={data.insights} />
       <IncomeExpenseChart months={data.monthlySpending} />
       <SpendingTrend points={data.dailySpending} />
@@ -122,6 +125,11 @@ const styles = StyleSheet.create({
   netLabel: { color: colors.forestSoft, fontFamily: fontFamily.semiBold, fontSize: 11, letterSpacing: 1 },
   netValue: { color: colors.white, fontFamily: fontFamily.bold, fontSize: 25, fontVariant: ['tabular-nums'], marginTop: spacing.xs },
   netCaption: { color: colors.forestSoft, fontFamily: fontFamily.regular, fontSize: 12, marginTop: spacing.xs },
+  savingsMoment: { alignItems: 'center', backgroundColor: colors.forestSoft, borderRadius: radii.md, flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm, padding: spacing.sm, position: 'relative' },
+  savingsCopy: { flex: 1, paddingRight: spacing.md },
+  savingsTitle: { color: colors.forestDark, fontFamily: fontFamily.semiBold, fontSize: 14 },
+  savingsText: { color: colors.forestDark, fontFamily: fontFamily.regular, fontSize: 12, lineHeight: 18, marginTop: spacing.xs },
+  savingsSparkle: { opacity: 0.65, position: 'absolute', right: 10, top: 10 },
   rate: { alignItems: 'flex-end', marginLeft: spacing.sm },
   rateLabel: { color: colors.forestSoft, fontFamily: fontFamily.regular, fontSize: 11 },
   rateValue: { color: colors.white, fontFamily: fontFamily.bold, fontSize: 19, fontVariant: ['tabular-nums'], marginTop: spacing.xs },

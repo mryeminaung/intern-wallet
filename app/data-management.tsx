@@ -78,8 +78,8 @@ export default function DataManagementScreen(): React.JSX.Element {
   return <Screen><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
     <View style={styles.header}><Pressable accessibilityLabel="Go back" onPress={() => router.back()} style={styles.back}><ArrowLeft color={colors.text} size={22} /></Pressable><Text style={styles.title}>Data management</Text></View>
     <Text style={styles.subtitle}>Your data stays on this device unless you choose to share it.</Text>
-    <View style={styles.card}><Text style={styles.heading}>CSV transactions</Text><Text style={styles.help}>Export income and expense rows with date, type, category, amount in MMK, and note.</Text><Action label="Export CSV file" disabled={busy} onPress={() => { void exportFile('csv'); }} /></View>
-    <View style={styles.card}><Text style={styles.heading}>JSON backup</Text><Text style={styles.help}>Export transactions, categories, monthly budgets, daily limit, internship dates, and app settings.</Text><Action label="Export JSON backup" disabled={busy} onPress={() => { void exportFile('backup'); }} /></View>
+    <View style={styles.card}><Text style={styles.heading}>CSV activity</Text><Text style={styles.help}>Export income, expense, and transfer rows with source and amount in MMK.</Text><Action label="Export CSV file" disabled={busy} onPress={() => { void exportFile('csv'); }} /></View>
+    <View style={styles.card}><Text style={styles.heading}>JSON backup</Text><Text style={styles.help}>Export transactions, transfers, categories, budgets, internship dates, and app settings.</Text><Action label="Export JSON backup" disabled={busy} onPress={() => { void exportFile('backup'); }} /></View>
     <View style={styles.card}>
       <Text style={styles.heading}>Restore backup</Text>
       <Text style={styles.help}>Choose an Intern Wallet JSON backup. Its contents are validated before you can replace your current data.</Text>
@@ -87,7 +87,7 @@ export default function DataManagementScreen(): React.JSX.Element {
       {selectedBackup ? <View style={styles.filePreview}>
         <Text numberOfLines={1} style={styles.fileName}>{selectedBackup.name}</Text>
         <Text style={styles.fileDetails}>Created {new Date(selectedBackup.preview.createdAt).toLocaleString()}</Text>
-        <Text style={styles.fileDetails}>{selectedBackup.preview.transactions} transactions · {selectedBackup.preview.categories} categories · {selectedBackup.preview.budgets} budgets</Text>
+        <Text style={styles.fileDetails}>{selectedBackup.preview.transactions} transactions · {selectedBackup.preview.transfers} transfers · {selectedBackup.preview.categories} categories · {selectedBackup.preview.budgets} budgets</Text>
         <Action label="Restore selected backup" disabled={busy} onPress={confirmRestore} />
       </View> : null}
     </View>

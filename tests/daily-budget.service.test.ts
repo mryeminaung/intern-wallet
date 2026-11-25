@@ -1,6 +1,6 @@
 import type { AnalyticsRepository } from '@/database/repositories/analytics.repository';
 import type { SettingsRepository } from '@/database/repositories/settings.repository';
-import { DailyBudgetService } from '@/features/budget';
+import { DailyBudgetService } from '@/features/budget/services/daily-budget.service';
 import { settingKeys } from '@/lib/constants';
 import { endOfDayIso, startOfDayIso } from '@/lib/date';
 

@@ -1,5 +1,6 @@
 import { Screen } from "@/components/shared/Screen";
 import { useDailyBudget } from "@/features/budget";
+import { useTransactionFilterStore } from '@/stores/transaction-filter.store';
 import {
 	BalanceCard,
 	DailyBudgetCard,
@@ -28,6 +29,7 @@ import {
 
 export function DashboardScreen(): React.JSX.Element {
 	const router = useRouter();
+	const setSourceKey = useTransactionFilterStore((state) => state.setSourceKey);
 	const { data, loading, error, refresh } = useDashboard();
 	const {
 		data: dailyBudget,
@@ -165,7 +167,7 @@ export function DashboardScreen(): React.JSX.Element {
 							onAddExpense={() => router.push("/transactions/new?type=expense")}
 							onAddIncome={() => router.push("/transactions/new?type=income")}
 						/>
-						<BalanceCard balance={data.balance} />
+						<BalanceCard balance={data.balance} sources={data.sourceBalances} onOpenSource={(key) => { setSourceKey(key); router.push('/transactions'); }} onTransfer={() => router.push('/transfers/new')} />
 						<MonthlySnapshot
 							expenses={data.monthExpenses}
 							income={data.monthIncome}

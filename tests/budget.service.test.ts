@@ -4,7 +4,7 @@ import type { CategoryRepository } from '@/database/repositories/category.reposi
 import {
   BudgetService,
   getBudgetStatus,
-} from '@/features/budget';
+} from '@/features/budget/services/budget.service';
 
 describe('BudgetService', () => {
   it('uses expense transactions only and marks an exceeded overall budget', async () => {

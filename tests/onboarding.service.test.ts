@@ -2,8 +2,8 @@ import type { SettingsRepository } from '@/database/repositories/settings.reposi
 import {
   OnboardingService,
   recommendedDailyLimit,
-} from '@/features/onboarding';
-import type { TransactionService } from '@/features/transactions';
+} from '@/features/onboarding/services/onboarding.service';
+import type { TransactionService } from '@/features/transactions/services/transaction.service';
 import { PERSONAL_SAVINGS_CATEGORY_ID, settingKeys } from '@/lib/constants';
 
 function createDependencies(): { settings: SettingsRepository; transactions: Pick<TransactionService, 'create'> } {
@@ -34,6 +34,8 @@ describe('OnboardingService', () => {
       amount: 300_000,
       categoryId: PERSONAL_SAVINGS_CATEGORY_ID,
       note: 'Opening balance',
+      sourceType: 'cash',
+      bankName: null,
       date: referenceDate.toISOString(),
     });
     expect(dependencies.settings.set).toHaveBeenLastCalledWith(settingKeys.onboardingCompleted, 'true');

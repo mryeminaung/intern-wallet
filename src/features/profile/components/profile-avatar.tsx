@@ -3,11 +3,14 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { UserRound } from 'lucide-react-native';
 import { colors } from '@/theme/colors';
 import { fontFamily } from '@/theme/typography';
+import { getBuiltInAvatar } from '../avatars';
 
 export function ProfileAvatar({ avatarUri, displayName, size }: { avatarUri: string | null; displayName: string; size: number }): React.JSX.Element {
   const [imageFailed, setImageFailed] = useState(false);
   useEffect(() => setImageFailed(false), [avatarUri]);
   const frame = { borderRadius: size / 2, height: size, width: size };
+  const builtInAvatar = getBuiltInAvatar(avatarUri);
+  if (builtInAvatar) return <Image accessibilityIgnoresInvertColors accessibilityLabel={`${displayName || 'Profile'} avatar`} resizeMethod="resize" source={builtInAvatar.source} style={[styles.image, frame]} />;
   if (avatarUri && !imageFailed) return <Image accessibilityLabel={`${displayName || 'Profile'} photo`} onError={() => setImageFailed(true)} source={{ uri: avatarUri }} style={[styles.image, frame]} />;
   const initials = getInitials(displayName);
   return <View accessibilityLabel={`${displayName || 'Profile'} avatar`} style={[styles.fallback, frame]}>{initials ? <Text style={[styles.initials, { fontSize: size * 0.34 }]}>{initials}</Text> : <UserRound color={colors.forest} size={size * 0.46} strokeWidth={1.8} />}</View>;

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { SqliteTransactionRepository } from '@/database/repositories/transaction.repository';
 
@@ -9,6 +10,6 @@ export function useBankNames(): readonly string[] {
     try { setBankNames(await new SqliteTransactionRepository(database).getBankNames()); }
     catch { setBankNames([]); }
   }, [database]);
-  useEffect(() => { void refresh(); }, [refresh]);
+  useFocusEffect(useCallback(() => { void refresh(); }, [refresh]));
   return bankNames;
 }

@@ -25,7 +25,7 @@ export function CategorySelector({ categories, type, value, recentCategoryIds = 
 function CategoryRow({ categories, value, onChange }: { categories: readonly Category[]; value: string; onChange: (categoryId: string) => void }): React.JSX.Element {
   return <ScrollView contentContainerStyle={styles.row} horizontal showsHorizontalScrollIndicator={false}>{categories.map((category) => {
     const selected = category.id === value;
-    return <Pressable accessibilityRole="button" key={category.id} onPress={() => onChange(category.id)} style={[styles.chip, selected && styles.selected]}><Text style={styles.icon}>{category.icon}</Text><Text style={[styles.text, selected && styles.selectedText]}>{category.name}</Text>{selected ? <Check color={colors.white} size={15} strokeWidth={3} /> : null}</Pressable>;
+    return <Pressable accessibilityRole="button" accessibilityState={{ selected }} key={category.id} onPress={() => onChange(category.id)} style={[styles.chip, selected && styles.selected]}><Text style={styles.icon}>{category.icon}</Text><Text style={[styles.text, selected && styles.selectedText]}>{category.name}</Text>{selected ? <Check color={colors.white} size={15} strokeWidth={3} /> : null}</Pressable>;
   })}</ScrollView>;
 }
 

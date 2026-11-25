@@ -8,6 +8,8 @@ export type OnboardingInput = {
   internshipEndDate: string;
   startingBalance: number;
   dailyLimit: number | null;
+  openingSourceType?: 'cash' | 'bank';
+  openingBankName?: string | null;
 };
 
 export class OnboardingService {
@@ -29,6 +31,8 @@ export class OnboardingService {
         amount: input.startingBalance,
         categoryId: PERSONAL_SAVINGS_CATEGORY_ID,
         note: 'Opening balance',
+        sourceType: input.openingSourceType ?? 'cash',
+        bankName: input.openingSourceType === 'bank' ? input.openingBankName ?? null : null,
         date: referenceDate.toISOString(),
       });
     }
@@ -58,5 +62,8 @@ function validateInput(input: OnboardingInput): void {
   }
   if (input.dailyLimit !== null && (!Number.isSafeInteger(input.dailyLimit) || input.dailyLimit <= 0)) {
     throw new Error('Daily limit must be a positive whole number.');
+  }
+  if (input.openingSourceType === 'bank' && (!input.openingBankName?.trim() || input.openingBankName.trim().length > 40)) {
+    throw new Error('Choose a bank for the starting balance.');
   }
 }

@@ -1,14 +1,16 @@
 import { useCallback, useMemo, useRef, useState, type ComponentRef, type RefObject } from 'react';
-import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ArrowLeft, ImagePlus, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, Check, ImagePlus, Trash2 } from 'lucide-react-native';
 import { Screen } from '@/components/shared/Screen';
 import { KeyboardAwareScrollView } from '@/components/shared/KeyboardAwareScrollView';
 import { SqliteSettingsRepository } from '@/database/repositories/settings.repository';
 import {
   chooseProfileImage,
+  builtInAvatars,
   deleteOwnedProfileImage,
+  isBuiltInAvatarId,
   persistProfileImage,
   ProfileAvatar,
   ProfileService,
@@ -61,8 +63,8 @@ export default function ProfileScreen(): React.JSX.Element {
     setSaving(true); setError(null);
     let persistedAvatar: string | null = null;
     try {
-      if (avatarChanged && avatarUri) persistedAvatar = await persistProfileImage(avatarUri);
-      const finalAvatar = avatarChanged ? persistedAvatar : savedAvatarUri;
+      if (avatarChanged && avatarUri && !isBuiltInAvatarId(avatarUri)) persistedAvatar = await persistProfileImage(avatarUri);
+      const finalAvatar = avatarChanged ? (isBuiltInAvatarId(avatarUri) ? avatarUri : persistedAvatar) : savedAvatarUri;
       await service.save({ avatarUri: finalAvatar, displayName, organization, role });
       if (avatarChanged && savedAvatarUri !== finalAvatar) deleteOwnedProfileImage(savedAvatarUri);
       showNotice('Profile updated');
@@ -79,13 +81,17 @@ export default function ProfileScreen(): React.JSX.Element {
     {loading ? <ActivityIndicator color={colors.forest} style={styles.loading} /> : <>
       <View style={styles.photoCard}>
         <ProfileAvatar avatarUri={avatarUri} displayName={displayName} size={104} />
-        <View style={styles.photoActions}><Pressable accessibilityRole="button" onPress={() => { void changePhoto(); }} style={({ pressed }) => [styles.photoButton, pressed && styles.pressed]}><ImagePlus color={colors.forest} size={18} /><Text style={styles.photoButtonText}>{avatarUri ? 'Change photo' : 'Choose photo'}</Text></Pressable>{avatarUri ? <Pressable accessibilityRole="button" onPress={() => { setAvatarUri(null); setAvatarChanged(true); }} style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}><Trash2 color={colors.expense} size={16} /><Text style={styles.removeText}>Remove</Text></Pressable> : null}</View>
+        <View style={styles.photoActions}><Pressable accessibilityRole="button" onPress={() => { void changePhoto(); }} style={({ pressed }) => [styles.photoButton, pressed && styles.pressed]}><ImagePlus color={colors.forest} size={18} /><Text style={styles.photoButtonText}>{avatarUri && !isBuiltInAvatarId(avatarUri) ? 'Change photo' : 'Use my photo'}</Text></Pressable>{avatarUri ? <Pressable accessibilityRole="button" onPress={() => { setAvatarUri(null); setAvatarChanged(savedAvatarUri !== null); }} style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}><Trash2 color={colors.expense} size={16} /><Text style={styles.removeText}>Remove</Text></Pressable> : null}</View>
       </View>
+      <View style={styles.avatarSection}><Text style={styles.avatarSectionTitle}>Or choose an avatar</Text><Text style={styles.avatarSectionText}>Pick one of the included characters. You can change it anytime.</Text><View style={styles.avatarGrid}>{builtInAvatars.map((avatar) => {
+        const selected = avatarUri === avatar.id;
+        return <Pressable accessibilityLabel={avatar.label} accessibilityRole="button" accessibilityState={{ selected }} key={avatar.id} onPress={() => { setAvatarUri(avatar.id); setAvatarChanged(avatar.id !== savedAvatarUri); }} style={({ pressed }) => [styles.avatarOption, selected && styles.avatarOptionSelected, pressed && styles.pressed]}><Image accessibilityIgnoresInvertColors resizeMethod="resize" source={avatar.source} style={styles.avatarImage} />{selected ? <View style={styles.selectedBadge}><Check color={colors.white} size={12} strokeWidth={3} /></View> : null}</Pressable>;
+      })}</View></View>
       <View style={styles.form}>
         <Field label="Display name" maxLength={40} onChangeText={setDisplayName} onSubmitEditing={() => roleInputRef.current?.focus()} placeholder="For example, May" value={displayName} />
         <Field inputRef={roleInputRef} label="Internship role" maxLength={60} onChangeText={setRole} onSubmitEditing={() => organizationInputRef.current?.focus()} optional placeholder="For example, UI/UX Design Intern" value={role} />
         <Field inputRef={organizationInputRef} label="Organization" maxLength={60} onChangeText={setOrganization} onSubmitEditing={Keyboard.dismiss} optional placeholder="Company or school" returnKeyType="done" value={organization} />
-        <Text style={styles.help}>Your name appears in the Home greeting. Text details are included in JSON backups; the local photo is not.</Text>
+        <Text style={styles.help}>Your name appears in the Home greeting. Text details and included avatars are saved in JSON backups; photos from your device are not.</Text>
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
         <Pressable accessibilityRole="button" disabled={saving} onPress={() => { void save(); }} style={[styles.save, saving && styles.disabled]}>{saving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveText}>Save profile</Text>}</Pressable>
       </View>
@@ -111,6 +117,14 @@ const styles = StyleSheet.create({
   photoButtonText: { color: colors.forest, fontFamily: fontFamily.semiBold, fontSize: 13 },
   removeButton: { alignItems: 'center', flexDirection: 'row', gap: spacing.xs, minHeight: 44, paddingHorizontal: spacing.sm },
   removeText: { color: colors.expense, fontFamily: fontFamily.semiBold, fontSize: 13 },
+  avatarSection: { marginTop: spacing.xl },
+  avatarSectionTitle: { color: colors.text, fontFamily: fontFamily.semiBold, fontSize: 16 },
+  avatarSectionText: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 12, lineHeight: 18, marginTop: spacing.xs },
+  avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },
+  avatarOption: { aspectRatio: 1, backgroundColor: colors.forestSoft, borderColor: 'transparent', borderRadius: 99, borderWidth: 2, padding: 2, width: '22%' },
+  avatarOptionSelected: { borderColor: colors.forest },
+  avatarImage: { borderRadius: 99, flex: 1, width: '100%' },
+  selectedBadge: { alignItems: 'center', backgroundColor: colors.forest, borderRadius: 99, bottom: 0, height: 20, justifyContent: 'center', position: 'absolute', right: 0, width: 20 },
   pressed: { opacity: 0.7 },
   form: { backgroundColor: colors.surface, borderRadius: radii.lg, marginTop: spacing.xl, padding: spacing.lg, ...shadows.soft },
   field: { marginBottom: spacing.lg },

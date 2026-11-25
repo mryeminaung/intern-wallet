@@ -10,6 +10,14 @@
     "plugins": [
       "expo-router",
       "expo-sqlite",
+      "expo-notifications",
+      [
+        "expo-status-bar",
+        {
+          "hidden": false,
+          "style": "dark"
+        }
+      ],
       [
         "expo-splash-screen",
         {

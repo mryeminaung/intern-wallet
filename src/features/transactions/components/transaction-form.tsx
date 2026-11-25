@@ -38,6 +38,7 @@ type TransactionFormProps = {
   autoFocusAmount?: boolean;
   recentCategoryIds?: Partial<Record<TransactionType, readonly string[]>>;
   preferredCategoryIds?: Partial<Record<TransactionType, string>>;
+  preferredSources?: Partial<Record<TransactionType, { sourceType: 'cash' | 'bank'; bankName: string | null }>>;
   onSubmit: (values: TransactionFormValues) => Promise<void>;
 };
 
@@ -63,6 +64,7 @@ export function TransactionForm({
   autoFocusAmount = false,
   recentCategoryIds,
   preferredCategoryIds,
+  preferredSources,
   onSubmit,
 }: TransactionFormProps): React.JSX.Element {
   const [datePicker, setDatePicker] = useState(false);
@@ -92,11 +94,13 @@ export function TransactionForm({
   useEffect(() => {
     if (previousType.current !== selectedType) {
       setValue('categoryId', preferredCategoryIds?.[selectedType] ?? '');
+      setValue('sourceType', preferredSources?.[selectedType]?.sourceType ?? 'cash');
+      setValue('bankName', preferredSources?.[selectedType]?.bankName ?? '');
       previousType.current = selectedType;
     } else if (selectedCategory && selectedCategory.type !== selectedType) {
       setValue('categoryId', '');
     }
-  }, [preferredCategoryIds, selectedCategory, selectedType, setValue]);
+  }, [preferredCategoryIds, preferredSources, selectedCategory, selectedType, setValue]);
 
   const handleDateChange = (date: Date): void => {
     setDatePicker(false);
@@ -123,6 +127,7 @@ export function TransactionForm({
                   <Pressable
                     key={type}
                     accessibilityRole="button"
+                    accessibilityState={{ selected }}
                     onPress={() => field.onChange(type)}
                     style={[styles.segment, selected && styles.segmentSelected]}
                   >
@@ -167,11 +172,11 @@ export function TransactionForm({
 
         <Text style={styles.label}>{selectedType === 'income' ? 'Received in' : 'Paid from'}</Text>
         <View style={styles.segmentedControl}>
-          {(['cash', 'bank'] as const).map((sourceType) => <Pressable accessibilityRole="button" key={sourceType} onPress={() => { setValue('sourceType', sourceType, { shouldValidate: true }); if (sourceType === 'cash') setValue('bankName', ''); }} style={[styles.segment, selectedSourceType === sourceType && styles.segmentSelected]}><Text style={[styles.segmentText, selectedSourceType === sourceType && styles.segmentTextSelected]}>{sourceType === 'cash' ? 'Cash' : 'Bank'}</Text></Pressable>)}
+          {(['cash', 'bank'] as const).map((sourceType) => <Pressable accessibilityRole="button" accessibilityState={{ selected: selectedSourceType === sourceType }} key={sourceType} onPress={() => { setValue('sourceType', sourceType, { shouldValidate: true }); if (sourceType === 'cash') setValue('bankName', ''); }} style={[styles.segment, selectedSourceType === sourceType && styles.segmentSelected]}><Text style={[styles.segmentText, selectedSourceType === sourceType && styles.segmentTextSelected]}>{sourceType === 'cash' ? 'Cash' : 'Bank'}</Text></Pressable>)}
         </View>
         {errors.sourceType ? <Text style={styles.errorText}>{errors.sourceType.message}</Text> : null}
         {selectedSourceType === 'bank' ? <>
-          <View style={styles.bankChips}>{availableBankNames.map((name) => <Pressable accessibilityRole="button" key={name} onPress={() => setValue('bankName', name, { shouldValidate: true })} style={[styles.bankChip, selectedBankName?.toLocaleLowerCase() === name.toLocaleLowerCase() && styles.bankChipSelected]}><Text style={[styles.bankChipText, selectedBankName?.toLocaleLowerCase() === name.toLocaleLowerCase() && styles.bankChipTextSelected]}>{name}</Text></Pressable>)}</View>
+          <View style={styles.bankChips}>{availableBankNames.map((name) => <Pressable accessibilityRole="button" accessibilityState={{ selected: selectedBankName?.toLocaleLowerCase() === name.toLocaleLowerCase() }} key={name} onPress={() => setValue('bankName', name, { shouldValidate: true })} style={[styles.bankChip, selectedBankName?.toLocaleLowerCase() === name.toLocaleLowerCase() && styles.bankChipSelected]}><Text style={[styles.bankChipText, selectedBankName?.toLocaleLowerCase() === name.toLocaleLowerCase() && styles.bankChipTextSelected]}>{name}</Text></Pressable>)}</View>
           <Controller control={control} name="bankName" render={({ field }) => <TextInput accessibilityLabel="Bank name" editable={!submitting} onBlur={field.onBlur} onChangeText={field.onChange} placeholder="Or enter another bank" placeholderTextColor={colors.textMuted} style={styles.bankInput} value={field.value} />} />
           {errors.bankName ? <Text style={styles.errorText}>{errors.bankName.message}</Text> : null}
         </> : null}

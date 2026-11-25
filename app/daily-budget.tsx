@@ -9,6 +9,7 @@ import { KeyboardAwareScrollView } from '@/components/shared/KeyboardAwareScroll
 import { KeyboardDoneAccessory } from '@/components/shared/KeyboardDoneAccessory';
 import { SqliteSettingsRepository } from '@/database/repositories/settings.repository';
 import { settingKeys } from '@/lib/constants';
+import { checkBudgetAlerts } from '@/features/alerts/check-budget-alerts';
 import { formatDisplayDate, startOfDayIso } from '@/lib/date';
 import { colors } from '@/theme/colors';
 import { fontFamily } from '@/theme/typography';
@@ -89,6 +90,7 @@ export default function DailyBudgetScreen(): React.JSX.Element {
         { key: settingKeys.internshipStartDate, value: startDate ? startOfDayIso(startDate) : '' },
         { key: settingKeys.internshipEndDate, value: endDate ? startOfDayIso(endDate) : '' },
       ]);
+      void checkBudgetAlerts(database).catch(() => undefined);
       router.back();
     } catch {
       setError('Daily budget settings could not be saved.');

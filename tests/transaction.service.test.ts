@@ -1,6 +1,6 @@
 import type { CategoryRepository } from '@/database/repositories/category.repository';
 import type { TransactionRepository } from '@/database/repositories/transaction.repository';
-import { TransactionService } from '@/features/transactions';
+import { TransactionService } from '@/features/transactions/services/transaction.service';
 
 function createRepositories(): {
   transactions: TransactionRepository;

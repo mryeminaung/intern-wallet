@@ -3,13 +3,15 @@ import { DATABASE_NAME } from '@/lib/constants';
 import { initialMigration } from '@/database/migrations/001_initial';
 import { budgetScopeIndexesMigration } from '@/database/migrations/002_budget_scope_indexes';
 import { moneySourcesMigration } from '@/database/migrations/003_money_sources';
+import { transfersMigration } from '@/database/migrations/004_transfers';
+import { alertEventsMigration } from '@/database/migrations/005_alert_events';
 import { seedDefaultCategories } from './seed';
 import { setDisplayDateFormat } from '@/lib/date';
 import { setCurrencyDisplay } from '@/lib/currency';
 import { settingKeys } from '@/lib/constants';
 import type { Migration } from './schema';
 
-const migrations: readonly Migration[] = [initialMigration, budgetScopeIndexesMigration, moneySourcesMigration];
+const migrations: readonly Migration[] = [initialMigration, budgetScopeIndexesMigration, moneySourcesMigration, transfersMigration, alertEventsMigration];
 
 export async function initializeDatabase(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync('PRAGMA foreign_keys = ON;');

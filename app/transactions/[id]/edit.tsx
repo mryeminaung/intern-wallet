@@ -19,6 +19,7 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fontFamily } from '@/theme/typography';
 import type { Transaction } from '@/types/common';
+import { checkBudgetAlerts } from '@/features/alerts/check-budget-alerts';
 
 export default function EditTransactionScreen(): React.JSX.Element {
   const router = useRouter();
@@ -66,6 +67,7 @@ export default function EditTransactionScreen(): React.JSX.Element {
         new SqliteCategoryRepository(database),
       );
       await service.update(id, formValuesToTransactionInput(values));
+      void checkBudgetAlerts(database).catch(() => undefined);
       router.back();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Transaction could not be updated.');

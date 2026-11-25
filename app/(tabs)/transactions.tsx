@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react-native';
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react-native';
 import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Screen } from '@/components/shared/Screen';
 import { KeyboardDoneAccessory } from '@/components/shared/KeyboardDoneAccessory';
@@ -22,12 +22,18 @@ import { fontFamily } from '@/theme/typography';
 import { radii, shadows, spacing } from '@/theme/spacing';
 import type { TransactionSort } from '@/database/repositories/transaction.repository';
 import { defaultBankNames } from '@/lib/money-source';
+import { sourceLabel } from '@/lib/money-source';
+import { SqliteTransferRepository } from '@/database/repositories/transfer.repository';
+import { useSQLiteContext } from 'expo-sqlite';
+import type { Transfer } from '@/types/common';
 
 type FilterDate = 'from' | 'to' | null;
 const FILTER_KEYBOARD_ACCESSORY_ID = 'transaction-filter-keyboard';
 
 export default function TransactionsScreen(): React.JSX.Element {
   const router = useRouter();
+  const database = useSQLiteContext();
+  const [transfers, setTransfers] = useState<readonly Transfer[]>([]);
   const { type, categoryId, sourceKey, setType, setCategoryId, setSourceKey, reset } = useTransactionFilterStore();
   const { categories } = useTransactionCategories();
   const bankNames = useBankNames();
@@ -50,19 +56,20 @@ export default function TransactionsScreen(): React.JSX.Element {
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const period = useMemo(() => periodForMonth(month), [month]);
+  const searchAllDates = Boolean(search.trim() || sourceKey) && !fromDate && !toDate;
   const minAmountValue = parseAmount(minAmount);
   const maxAmountValue = parseAmount(maxAmount);
   const filters = useMemo(() => ({
     type: type === 'all' ? undefined : type,
     categoryId: categoryId ?? undefined,
     sourceKey: sourceKey ?? undefined,
-    fromDate: fromDate ? startOfDayIso(fromDate) : period.fromDate,
-    toDate: toDate ? endOfDayIso(toDate) : period.toDate,
+    fromDate: fromDate ? startOfDayIso(fromDate) : searchAllDates ? undefined : period.fromDate,
+    toDate: toDate ? endOfDayIso(toDate) : searchAllDates ? undefined : period.toDate,
     search,
     minAmount: minAmountValue,
     maxAmount: maxAmountValue,
     sort,
-  }), [categoryId, sourceKey, fromDate, maxAmountValue, minAmountValue, period.fromDate, period.toDate, search, sort, toDate, type]);
+  }), [categoryId, sourceKey, fromDate, maxAmountValue, minAmountValue, period.fromDate, period.toDate, search, searchAllDates, sort, toDate, type]);
   const { transactions, loading, error, refresh } = useTransactions(filters);
   const { summary, loading: summaryLoading, error: summaryError } = useTransactionSummary(period.fromDate, period.toDate);
   const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
@@ -74,6 +81,15 @@ export default function TransactionsScreen(): React.JSX.Element {
     else totals.expenses += transaction.amount;
     return totals;
   }, { income: 0, expenses: 0 }), [transactions]);
+  const visibleTransfers = useMemo(() => transfers.filter((transfer) => {
+    if (type !== 'all' || categoryId) return false;
+    if (fromDate && transfer.date < startOfDayIso(fromDate)) return false;
+    if (toDate && transfer.date > endOfDayIso(toDate)) return false;
+    if (minAmountValue !== undefined && transfer.amount < minAmountValue) return false;
+    if (maxAmountValue !== undefined && transfer.amount > maxAmountValue) return false;
+    const term = search.trim().toLocaleLowerCase();
+    return !term || [transfer.note ?? '', sourceLabel(transfer.fromSourceKey), sourceLabel(transfer.toSourceKey)].some((value) => value.toLocaleLowerCase().includes(term));
+  }).sort((a, b) => sort === 'highest' ? b.amount - a.amount : sort === 'lowest' ? a.amount - b.amount : sort === 'oldest' ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date)), [transfers, type, categoryId, fromDate, toDate, minAmountValue, maxAmountValue, search, sort]);
   const displayedTotals = hasFilters ? filteredTotals : summary;
   const invalidDateRange = Boolean(draftFromDate && draftToDate && startOfDayIso(draftFromDate) > startOfDayIso(draftToDate));
   const draftMinValue = parseAmount(draftMinAmount);
@@ -84,7 +100,10 @@ export default function TransactionsScreen(): React.JSX.Element {
     || (draftMinValue !== undefined && draftMaxValue !== undefined && draftMinValue > draftMaxValue),
   );
 
-  useFocusEffect(useCallback(() => { void refresh(); }, [refresh]));
+  useFocusEffect(useCallback(() => {
+    void refresh();
+    void new SqliteTransferRepository(database).list(searchAllDates ? undefined : period.fromDate, searchAllDates ? undefined : period.toDate, sourceKey ?? undefined).then(setTransfers).catch(() => setTransfers([]));
+  }, [database, period.fromDate, period.toDate, refresh, searchAllDates, sourceKey]));
 
   const changeMonth = (offset: number): void => {
     const [yearText, monthText] = month.split('-');
@@ -159,8 +178,9 @@ export default function TransactionsScreen(): React.JSX.Element {
         <View style={styles.headerCopy}><Text style={styles.title}>Activity</Text><Text style={styles.subtitle}>Every income and expense, in one place.</Text></View>
         <Pressable accessibilityLabel="Add transaction" accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}><Plus color={colors.white} size={22} /></Pressable>
       </View>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/transfers/new')} style={styles.transferAction}><ArrowLeftRight color={colors.forest} size={17} /><Text style={styles.transferActionText}>Transfer money</Text></Pressable>
 
-      <View style={styles.monthSelector}><Pressable accessibilityLabel="Previous month" onPress={() => changeMonth(-1)} style={styles.monthButton}><ChevronLeft color={colors.forest} size={21} /></Pressable><Text style={styles.monthLabel}>{period.label}</Text><Pressable accessibilityLabel="Next month" disabled={month >= currentMonth} onPress={() => changeMonth(1)} style={[styles.monthButton, month >= currentMonth && styles.disabled]}><ChevronRight color={month >= currentMonth ? colors.border : colors.forest} size={21} /></Pressable></View>
+      {searchAllDates ? <Text style={styles.searchScope}>Showing all dates</Text> : <View style={styles.monthSelector}><Pressable accessibilityLabel="Previous month" onPress={() => changeMonth(-1)} style={styles.monthButton}><ChevronLeft color={colors.forest} size={21} /></Pressable><Text style={styles.monthLabel}>{period.label}</Text><Pressable accessibilityLabel="Next month" disabled={month >= currentMonth} onPress={() => changeMonth(1)} style={[styles.monthButton, month >= currentMonth && styles.disabled]}><ChevronRight color={month >= currentMonth ? colors.border : colors.forest} size={21} /></Pressable></View>}
 
       <View style={styles.summaryRow}>
         <SummaryCard icon={ArrowUpRight} label={hasFilters ? 'Filtered income' : 'Income'} value={displayedTotals?.income ?? 0} color={colors.income} background="#E5F4EB" />
@@ -174,8 +194,9 @@ export default function TransactionsScreen(): React.JSX.Element {
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {loading ? <View style={styles.loading}><ActivityIndicator color={colors.forest} /><Text style={styles.status}>Loading transactions…</Text></View> : null}
-      {!loading && transactions.length === 0 ? <View style={styles.emptyState}><Text style={styles.emptyIcon}>🧾</Text><Text style={styles.emptyTitle}>{hasFilters ? 'No matching transactions' : 'No transactions this month'}</Text><Text style={styles.emptyMessage}>{hasFilters ? 'Try clearing a filter or searching for another category.' : 'Add your first transaction to start tracking this month.'}</Text><Pressable accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={styles.emptyButton}><Text style={styles.emptyButtonText}>Add transaction</Text></Pressable></View> : null}
+      {!loading && transactions.length === 0 && visibleTransfers.length === 0 ? <View style={styles.emptyState}><Text style={styles.emptyIcon}>🧾</Text><Text style={styles.emptyTitle}>{hasFilters ? 'No matching activity' : 'No activity this month'}</Text><Text style={styles.emptyMessage}>{hasFilters ? 'Try clearing a filter or searching again.' : 'Add your first transaction to start tracking this month.'}</Text><Pressable accessibilityRole="button" onPress={() => router.push('/transactions/new')} style={styles.emptyButton}><Text style={styles.emptyButtonText}>Add transaction</Text></Pressable></View> : null}
       <TransactionList categories={categoryById} onTransactionPress={(id) => router.push(`/transactions/${id}`)} transactions={transactions} />
+      {visibleTransfers.length > 0 ? <View style={styles.transferSection}><Text style={styles.sectionTitle}>Transfers</Text>{visibleTransfers.map((transfer) => <Pressable accessibilityRole="button" key={transfer.id} onPress={() => router.push(`/transfers/${transfer.id}`)} style={styles.transferRow}><ArrowLeftRight color={colors.forest} size={18} /><View style={styles.transferCopy}><Text style={styles.transferTitle}>{sourceLabel(transfer.fromSourceKey)} → {sourceLabel(transfer.toSourceKey)}</Text><Text style={styles.transferDate}>{formatDisplayDate(transfer.date)}</Text></View><Text style={styles.transferAmount}>{formatMMK(transfer.amount)}</Text><ChevronRight color={colors.textMuted} size={16} /></Pressable>)}</View> : null}
     </ScrollView>
 
     <Modal animationType="slide" onRequestClose={closeAdvanced} transparent visible={advancedOpen}>
@@ -222,6 +243,13 @@ function parseAmount(value: string): number | undefined {
 }
 
 const styles = StyleSheet.create({
+  searchScope: { color: colors.textMuted, fontFamily: fontFamily.medium, fontSize: 13, marginTop: spacing.md },
+  transferAction: { alignItems: 'center', alignSelf: 'flex-start', flexDirection: 'row', gap: spacing.xs, minHeight: 44, marginTop: spacing.sm },
+  transferActionText: { color: colors.forest, fontFamily: fontFamily.semiBold, fontSize: 13 },
+  transferSection: { marginTop: spacing.lg },
+  transferRow: { alignItems: 'center', backgroundColor: colors.surface, borderBottomColor: colors.border, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: 'row', gap: spacing.sm, minHeight: 64, paddingHorizontal: spacing.md },
+  transferCopy: { flex: 1 }, transferTitle: { color: colors.text, fontFamily: fontFamily.medium, fontSize: 13 }, transferDate: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 11, marginTop: 2 },
+  transferAmount: { color: colors.text, fontFamily: fontFamily.semiBold, fontSize: 13 },
   content: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.screenTop, paddingBottom: spacing.tabBarClearance },
   headerRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
   headerCopy: { flex: 1 },

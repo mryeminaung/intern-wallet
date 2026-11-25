@@ -1,9 +1,10 @@
 import { daysBetween, formatMonth, monthPeriod } from '@/lib/date';
-import type { AnalyticsRepository, CategorySpendingRow, RecentTransactionRow } from '@/database/repositories/analytics.repository';
+import type { AnalyticsRepository, CategorySpendingRow, RecentTransactionRow, SourceBalanceRow } from '@/database/repositories/analytics.repository';
 import type { BudgetRepository } from '@/database/repositories/budget.repository';
 
 export type DashboardData = {
   balance: number;
+  sourceBalances: readonly SourceBalanceRow[];
   monthIncome: number;
   monthExpenses: number;
   totalBudget: number;
@@ -26,13 +27,14 @@ export class DashboardService {
     const current = monthPeriod(0, referenceDate);
     const previous = monthPeriod(-1, referenceDate);
     const monthKey = formatMonth(referenceDate);
-    const [allTime, currentTotals, previousTotals, categories, budgets, recentTransactions] = await Promise.all([
+    const [allTime, currentTotals, previousTotals, categories, budgets, recentTransactions, sourceBalances] = await Promise.all([
       this.analytics.getTotals(),
       this.analytics.getTotals(current.fromDate, current.toDate),
       this.analytics.getTotals(previous.fromDate, previous.toDate),
       this.analytics.getCategorySpending(current.fromDate, current.toDate),
       this.budgets.list(monthKey),
       this.analytics.getRecentTransactions(3),
+      this.analytics.getSourceBalances(),
     ]);
     const overallBudget = budgets.find((budget) => budget.categoryId === null);
     const totalBudget = overallBudget?.amount ?? budgets.reduce((sum, budget) => sum + budget.amount, 0);
@@ -41,6 +43,7 @@ export class DashboardService {
       : daysBetween(current.fromDate, current.toDate);
     return {
       balance: allTime.income - allTime.expenses,
+      sourceBalances,
       monthIncome: currentTotals.income,
       monthExpenses: currentTotals.expenses,
       totalBudget,

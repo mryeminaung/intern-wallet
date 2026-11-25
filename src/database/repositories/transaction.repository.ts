@@ -160,9 +160,16 @@ export class SqliteTransactionRepository implements TransactionRepository {
 
   public async getBankNames(): Promise<readonly string[]> {
     const rows = await this.database.getAllAsync<{ bank_name: string }>(
-      "SELECT MIN(bank_name) AS bank_name FROM transactions WHERE source_type = 'bank' AND bank_name IS NOT NULL GROUP BY LOWER(bank_name) ORDER BY bank_name COLLATE NOCASE",
+      "SELECT MIN(bank_name) AS bank_name FROM (SELECT bank_name FROM transactions WHERE source_type = 'bank' AND bank_name IS NOT NULL UNION ALL SELECT SUBSTR(from_source_key, 6) AS bank_name FROM transfers WHERE from_source_key LIKE 'bank:%' UNION ALL SELECT SUBSTR(to_source_key, 6) AS bank_name FROM transfers WHERE to_source_key LIKE 'bank:%') GROUP BY LOWER(bank_name) ORDER BY bank_name COLLATE NOCASE",
     );
     return rows.map((row) => row.bank_name);
+  }
+
+  public async getLastUsedSource(type: TransactionType): Promise<{ sourceType: MoneySourceType; bankName: string | null } | null> {
+    const row = await this.database.getFirstAsync<{ source_type: MoneySourceType; bank_name: string | null }>(
+      'SELECT source_type, bank_name FROM transactions WHERE type = ? AND source_type IS NOT NULL ORDER BY date DESC, created_at DESC LIMIT 1', type,
+    );
+    return row ? { sourceType: row.source_type, bankName: row.bank_name } : null;
   }
 
   public async create(input: CreateTransactionInput): Promise<Transaction> {

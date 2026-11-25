@@ -4,24 +4,26 @@ import { SqliteCategoryRepository } from './category.repository';
 import { SqliteTransactionRepository } from './transaction.repository';
 import { SqliteBudgetRepository } from './budget.repository';
 import { SqliteSettingsRepository } from './settings.repository';
+import { SqliteTransferRepository } from './transfer.repository';
 import { seedDefaultCategories } from '@/database/seed';
 
 export class DataManagementRepository {
   public constructor(private readonly database: SQLiteDatabase) {}
 
   public async readAll(): Promise<WalletData> {
-    const [categories, transactions, budgets, settings] = await Promise.all([
+    const [categories, transactions, transfers, budgets, settings] = await Promise.all([
       new SqliteCategoryRepository(this.database).list(),
       new SqliteTransactionRepository(this.database).getAll(),
+      new SqliteTransferRepository(this.database).list(),
       new SqliteBudgetRepository(this.database).list(),
       new SqliteSettingsRepository(this.database).list(),
     ]);
-    return { categories, transactions, budgets, settings };
+    return { categories, transactions, transfers, budgets, settings };
   }
 
   public async replaceAll(data: WalletData): Promise<void> {
     await this.database.withTransactionAsync(async () => {
-      await this.database.execAsync('DELETE FROM transactions; DELETE FROM budgets; DELETE FROM categories; DELETE FROM settings;');
+      await this.database.execAsync('DELETE FROM alert_events; DELETE FROM transfers; DELETE FROM transactions; DELETE FROM budgets; DELETE FROM categories; DELETE FROM settings;');
       for (const category of data.categories) {
         await this.database.runAsync(
           'INSERT INTO categories (id, name, icon, type, is_default) VALUES (?, ?, ?, ?, ?)',
@@ -42,6 +44,12 @@ export class DataManagementRepository {
         await this.database.runAsync(
           'INSERT INTO budgets (id, month, category_id, amount) VALUES (?, ?, ?, ?)',
           budget.id, budget.month, budget.categoryId, budget.amount,
+        );
+      }
+      for (const transfer of data.transfers) {
+        await this.database.runAsync(
+          'INSERT INTO transfers (id, from_source_key, to_source_key, amount, note, date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          transfer.id, transfer.fromSourceKey, transfer.toSourceKey, transfer.amount, transfer.note, transfer.date, transfer.createdAt, transfer.updatedAt,
         );
       }
       for (const setting of data.settings) {

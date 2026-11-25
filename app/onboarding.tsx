@@ -3,8 +3,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { CalendarDays, Check, ChevronLeft, ShieldCheck, Sparkles, WalletCards } from 'lucide-react-native';
-import { ActivityIndicator, Image, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Screen } from '@/components/shared/Screen';
+import { WalletMascot } from '@/components/ui/WalletMascot';
+import { Decoration } from '@/components/ui/Decoration';
 import { KeyboardAwareScrollView } from '@/components/shared/KeyboardAwareScrollView';
 import { KeyboardDoneAccessory } from '@/components/shared/KeyboardDoneAccessory';
 import { SqliteCategoryRepository } from '@/database/repositories/category.repository';
@@ -35,6 +37,8 @@ export default function OnboardingScreen(): React.JSX.Element {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(() => { const date = new Date(); date.setMonth(date.getMonth() + 3); return date; });
   const [startingBalance, setStartingBalance] = useState('');
+  const [openingSourceType, setOpeningSourceType] = useState<'cash' | 'bank'>('cash');
+  const [openingBankName, setOpeningBankName] = useState('');
   const [dailyLimit, setDailyLimit] = useState('');
   const [picker, setPicker] = useState<PickerField>(null);
   const [busy, setBusy] = useState(false);
@@ -65,6 +69,7 @@ export default function OnboardingScreen(): React.JSX.Element {
       setError('Enter a positive whole number or leave the balance empty.');
       return;
     }
+    if (step === 2 && (parseAmount(startingBalance) ?? 0) > 0 && openingSourceType === 'bank' && !openingBankName.trim()) { setError('Enter the bank holding your starting balance.'); return; }
     if (step === 2 && !dailyLimit && recommendation > 0) setDailyLimit(String(recommendation));
     setStep((current) => Math.min(3, current + 1));
   };
@@ -74,11 +79,12 @@ export default function OnboardingScreen(): React.JSX.Element {
     const balance = parseAmount(startingBalance);
     const limit = dailyLimit.trim() ? parsePositiveAmount(dailyLimit) : null;
     if (balance === null) { setError('Enter a valid starting balance.'); return; }
+    if (balance > 0 && openingSourceType === 'bank' && !openingBankName.trim()) { setError('Enter the bank holding your starting balance.'); return; }
     if (dailyLimit.trim() && limit === null) { setError('Enter a positive whole-number daily limit.'); return; }
     setBusy(true); setError(null);
     try {
       await database.withTransactionAsync(async () => {
-        await service.complete({ internshipStartDate: startDate.toISOString(), internshipEndDate: endDate.toISOString(), startingBalance: balance, dailyLimit: limit });
+        await service.complete({ internshipStartDate: startDate.toISOString(), internshipEndDate: endDate.toISOString(), startingBalance: balance, dailyLimit: limit, openingSourceType, openingBankName });
       });
       router.replace('/');
     } catch (cause) {
@@ -101,7 +107,7 @@ export default function OnboardingScreen(): React.JSX.Element {
 
     {step === 0 ? <WelcomeStep /> : null}
     {step === 1 ? <DatesStep endDate={endDate} onOpenPicker={setPicker} startDate={startDate} /> : null}
-    {step === 2 ? <BalanceStep value={startingBalance} onChange={setStartingBalance} /> : null}
+    {step === 2 ? <BalanceStep value={startingBalance} onChange={setStartingBalance} sourceType={openingSourceType} onSourceChange={setOpeningSourceType} bankName={openingBankName} onBankNameChange={setOpeningBankName} /> : null}
     {step === 3 ? <PlanStep dailyLimit={dailyLimit} days={calendarDaysInclusive(new Date().getTime() < startDate.getTime() ? startDate : new Date(), endDate)} onChange={setDailyLimit} recommendation={recommendation} startingBalance={parseAmount(startingBalance) ?? 0} /> : null}
 
     {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -113,15 +119,15 @@ export default function OnboardingScreen(): React.JSX.Element {
 }
 
 function WelcomeStep(): React.JSX.Element {
-  return <View style={styles.step}><Image accessibilityIgnoresInvertColors source={require('../assets/icon.png')} style={styles.logo} /><Text style={styles.eyebrow}>WELCOME TO INTERN WALLET</Text><Text style={styles.title}>Make your money last through your internship.</Text><Text style={styles.subtitle}>A short setup will turn your balance and internship dates into a useful daily spending guide.</Text><View style={styles.privacy}><ShieldCheck color={colors.forest} size={21} /><View style={styles.privacyCopy}><Text style={styles.privacyTitle}>Private by default</Text><Text style={styles.privacyText}>Your financial information stays in the SQLite database on this device.</Text></View></View></View>;
+  return <View style={styles.step}><View style={styles.heroArt} pointerEvents="none"><Decoration height={172} name="organic-blob-light" style={styles.heroBlob} width={172} /><WalletMascot mood="welcome" size={152} style={styles.heroMascot} /><Decoration height={24} name="sparkle-green" style={styles.heroSparkle} width={24} /></View><Text style={styles.eyebrow}>WELCOME TO INTERN WALLET</Text><Text style={styles.title}>Make your money last through your internship.</Text><Text style={styles.subtitle}>A short setup will turn your balance and internship dates into a useful daily spending guide.</Text><View style={styles.privacy}><ShieldCheck color={colors.forest} size={21} /><View style={styles.privacyCopy}><Text style={styles.privacyTitle}>Private by default</Text><Text style={styles.privacyText}>Your financial information stays in the SQLite database on this device.</Text></View></View></View>;
 }
 
 function DatesStep({ startDate, endDate, onOpenPicker }: { startDate: Date; endDate: Date; onOpenPicker: (field: PickerField) => void }): React.JSX.Element {
   return <View style={styles.step}><View style={styles.stepIcon}><CalendarDays color={colors.forest} size={24} /></View><Text style={styles.eyebrow}>STEP 1 OF 3</Text><Text style={styles.title}>When is your internship?</Text><Text style={styles.subtitle}>We use this period to calculate how many spending days remain.</Text><Text style={styles.label}>Start date</Text><DateButton date={startDate} onPress={() => onOpenPicker('start')} /><Text style={styles.label}>End date</Text><DateButton date={endDate} onPress={() => onOpenPicker('end')} /></View>;
 }
 
-function BalanceStep({ value, onChange }: { value: string; onChange: (value: string) => void }): React.JSX.Element {
-  return <View style={styles.step}><View style={styles.stepIcon}><WalletCards color={colors.forest} size={24} /></View><Text style={styles.eyebrow}>STEP 2 OF 3</Text><Text style={styles.title}>How much money is available now?</Text><Text style={styles.subtitle}>Include savings or cash you can use during the internship. You can leave this empty and add income later.</Text><Text style={styles.label}>Starting balance</Text><View style={styles.amountField}><Text style={styles.currency}>MMK</Text><TextInput accessibilityLabel="Starting balance in MMK" autoFocus inputAccessoryViewID={ONBOARDING_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={onChange} placeholder="0" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={value} /></View><Text style={styles.helper}>This will be saved once as Personal Savings with the note “Opening balance.”</Text></View>;
+function BalanceStep({ value, onChange, sourceType, onSourceChange, bankName, onBankNameChange }: { value: string; onChange: (value: string) => void; sourceType: 'cash' | 'bank'; onSourceChange: (value: 'cash' | 'bank') => void; bankName: string; onBankNameChange: (value: string) => void }): React.JSX.Element {
+  return <View style={styles.step}><View style={styles.stepIcon}><WalletCards color={colors.forest} size={24} /></View><Text style={styles.eyebrow}>STEP 2 OF 3</Text><Text style={styles.title}>How much money is available now?</Text><Text style={styles.subtitle}>Include savings or cash you can use during the internship. You can leave this empty and add income later.</Text><Text style={styles.label}>Starting balance</Text><View style={styles.amountField}><Text style={styles.currency}>MMK</Text><TextInput accessibilityLabel="Starting balance in MMK" autoFocus inputAccessoryViewID={ONBOARDING_KEYBOARD_ACCESSORY_ID} keyboardType="number-pad" onChangeText={onChange} placeholder="0" placeholderTextColor={colors.textMuted} style={styles.amountInput} value={value} /></View><Text style={styles.label}>Where is this money?</Text><View style={styles.sourceRow}>{(['cash', 'bank'] as const).map((source) => <Pressable accessibilityRole="button" accessibilityState={{ selected: sourceType === source }} key={source} onPress={() => onSourceChange(source)} style={[styles.sourceChip, sourceType === source && styles.sourceSelected]}><Text style={[styles.sourceText, sourceType === source && styles.sourceTextSelected]}>{source === 'cash' ? 'Cash' : 'Bank'}</Text></Pressable>)}</View>{sourceType === 'bank' ? <TextInput accessibilityLabel="Bank holding starting balance" maxLength={40} onChangeText={onBankNameChange} placeholder="Bank name" placeholderTextColor={colors.textMuted} style={styles.bankInput} value={bankName} /> : null}<Text style={styles.helper}>This will be saved once as Personal Savings with the note “Opening balance.”</Text></View>;
 }
 
 function PlanStep({ startingBalance, recommendation, dailyLimit, days, onChange }: { startingBalance: number; recommendation: number; dailyLimit: string; days: number; onChange: (value: string) => void }): React.JSX.Element {
@@ -152,7 +158,10 @@ const styles = StyleSheet.create({
   progressFill: { backgroundColor: colors.forest, borderRadius: 99, height: '100%' },
   skip: { color: colors.forest, fontFamily: fontFamily.semiBold, fontSize: 13 },
   step: { marginTop: spacing.xl },
-  logo: { borderRadius: radii.lg, height: 82, width: 82 },
+  heroArt: { height: 158, width: 184 },
+  heroBlob: { left: 6, opacity: 0.75, position: 'absolute', top: -8 },
+  heroMascot: { left: 17, position: 'absolute', top: 4 },
+  heroSparkle: { position: 'absolute', right: 4, top: 12 },
   stepIcon: { alignItems: 'center', backgroundColor: colors.forestSoft, borderRadius: radii.md, height: 52, justifyContent: 'center', width: 52 },
   eyebrow: { color: colors.income, fontFamily: fontFamily.semiBold, fontSize: 11, letterSpacing: 1.2, marginTop: spacing.lg },
   title: { color: colors.text, fontFamily: fontFamily.bold, fontSize: 29, lineHeight: 36, marginTop: spacing.sm },
@@ -167,6 +176,12 @@ const styles = StyleSheet.create({
   amountField: { alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.md, borderWidth: 1, flexDirection: 'row', minHeight: 64, paddingHorizontal: spacing.md },
   currency: { color: colors.forest, fontFamily: fontFamily.semiBold, fontSize: 15, marginRight: spacing.sm },
   amountInput: { color: colors.text, flex: 1, fontFamily: fontFamily.bold, fontSize: 27, fontVariant: ['tabular-nums'], paddingVertical: spacing.sm },
+  sourceRow: { flexDirection: 'row', gap: spacing.sm },
+  sourceChip: { alignItems: 'center', borderColor: colors.border, borderRadius: radii.md, borderWidth: 1, flex: 1, justifyContent: 'center', minHeight: 48 },
+  sourceSelected: { backgroundColor: colors.forest, borderColor: colors.forest },
+  sourceText: { color: colors.text, fontFamily: fontFamily.medium, fontSize: 14 },
+  sourceTextSelected: { color: colors.white },
+  bankInput: { borderColor: colors.border, borderRadius: radii.md, borderWidth: 1, color: colors.text, fontFamily: fontFamily.medium, fontSize: 15, minHeight: 50, marginTop: spacing.sm, paddingHorizontal: spacing.md },
   helper: { color: colors.textMuted, fontFamily: fontFamily.regular, fontSize: 11, lineHeight: 17, marginTop: spacing.sm },
   recommendation: { backgroundColor: colors.forest, borderRadius: radii.lg, marginTop: spacing.xl, padding: spacing.lg, ...shadows.floating },
   recommendationLabel: { color: '#A7F3D0', fontFamily: fontFamily.semiBold, fontSize: 10, letterSpacing: 1 },

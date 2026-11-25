@@ -31,6 +31,8 @@ export type MoneyFlowRow = {
   expenses: number;
 };
 
+export type SourceBalanceRow = { key: string; balance: number };
+
 export type RecentTransactionRow = {
   id: string;
   type: TransactionType;
@@ -57,10 +59,25 @@ export interface AnalyticsRepository {
   getHighestExpense(fromDate: string, toDate: string): Promise<ExpenseTransactionRow | null>;
   getRecentTransactions(limit: number): Promise<readonly RecentTransactionRow[]>;
   getMoneyFlows(fromDate: string, toDate: string): Promise<readonly MoneyFlowRow[]>;
+  getSourceBalances(): Promise<readonly SourceBalanceRow[]>;
 }
 
 export class SqliteAnalyticsRepository implements AnalyticsRepository {
   public constructor(private readonly database: SQLiteDatabase) {}
+
+  public async getSourceBalances(): Promise<readonly SourceBalanceRow[]> {
+    return this.database.getAllAsync<SourceBalanceRow>(`
+      SELECT key, SUM(delta) AS balance FROM (
+        SELECT CASE WHEN source_type = 'cash' THEN 'cash'
+                    WHEN source_type = 'bank' AND TRIM(COALESCE(bank_name, '')) <> '' THEN 'bank:' || LOWER(TRIM(bank_name))
+                    ELSE 'unspecified' END AS key,
+               CASE WHEN type = 'income' THEN amount ELSE -amount END AS delta
+        FROM transactions
+        UNION ALL SELECT from_source_key AS key, -amount AS delta FROM transfers
+        UNION ALL SELECT to_source_key AS key, amount AS delta FROM transfers
+      ) GROUP BY key ORDER BY CASE WHEN key = 'cash' THEN 0 WHEN key = 'unspecified' THEN 2 ELSE 1 END, key
+    `);
+  }
 
   public async getTotals(fromDate?: string, toDate?: string): Promise<PeriodTotals> {
     const conditions: string[] = [];
